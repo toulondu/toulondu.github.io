@@ -363,10 +363,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-03-24 15:07:43 / 修改时间：16:42:13" itemprop="dateCreated datePublished" datetime="2020-03-24T15:07:43+08:00">2020-03-24</time>
+              <time title="创建时间：2020-03-24 15:07:43" itemprop="dateCreated datePublished" datetime="2020-03-24T15:07:43+08:00">2020-03-24</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-26 21:22:36" itemprop="dateModified" datetime="2020-03-26T21:22:36+08:00">2020-03-26</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -415,12 +421,60 @@
 <p>除此之外还有full卷积和valid卷积，前者让图像最角落的元素也可以被充分利用，而后者则是不做填充。</p>
 <img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding02.png" class="" title="full卷积">
 <p>上图为full卷积</p>
-<h2 id="步幅-stride-卷积"><a href="#步幅-stride-卷积" class="headerlink" title="步幅(stride)卷积"></a>步幅(stride)卷积</h2><p>todo…</p>
-<h2 id="三维数据的卷积"><a href="#三维数据的卷积" class="headerlink" title="三维数据的卷积"></a>三维数据的卷积</h2><p>todo…</p>
-<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><p>todo…</p>
-<h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>todo…</p>
-<h2 id="经典卷积网络样例"><a href="#经典卷积网络样例" class="headerlink" title="经典卷积网络样例"></a>经典卷积网络样例</h2><p>todo…</p>
-<h2 id="卷积为什么有用"><a href="#卷积为什么有用" class="headerlink" title="卷积为什么有用"></a>卷积为什么有用</h2><p>todo…</p>
+<h2 id="步幅-stride-卷积"><a href="#步幅-stride-卷积" class="headerlink" title="步幅(stride)卷积"></a>步幅(stride)卷积</h2><p>在之前的介绍中，我们每次计算卷积后，都是在原图片上向右或者向下移动一步。而步幅卷积，顾名思义，就是将这个一步扩展开来，每次移动s步，我们以2为例：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride01.png" class="" title="步幅卷积1">
+
+<p>如上为第一步和第二步，此外，当需要向下移动时，也是移动s步</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride03.png" class="" title="步幅卷积3">
+
+<p>容易计算，经过步幅为s的卷积后，结果矩阵维度的计算方式为：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/strideFormula.png" class="" title="步幅卷积结果矩阵维度公式">
+
+<p>假如当向右移动s步已经超出了原矩阵范围，即当不能被整除的时候，就直接舍弃剩余部分直接向下走了。即向下取整。</p>
+<h2 id="三维数据的卷积"><a href="#三维数据的卷积" class="headerlink" title="三维数据的卷积"></a>三维数据的卷积</h2><p>对于现实情况中的图片来说，因为RGB格式的存在，我们的输入数据大多都是3维的，那么，如何将卷积扩展到三维数据上去呢？</p>
+<p>首先，卷积核（过滤器）也要变成三维，且第三个维度要和原矩阵相同(第三个维度在卷积中我们一般叫做<strong><em>通道</em></strong>)，如下：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D01.png" class="" title="三维数据卷积01">
+<p>可以看到，最终的结果是一个4*4的矩阵，没有了第三个维度，计算方法其实很简单，基本就是二维计算方式的三维扩展：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D02.png" class="" title="三维数据卷积02">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D03.png" class="" title="三维数据卷积03">
+<p>即把每个3×3×3 = 27个格子的数字对应相乘并相加，然后右移和下移即可，因为深度一致，并不需要关心第三个维度。</p>
+<p>卷积核的设计很灵活，假如你把卷积核的第二层和第三层都设置为0，相当于在结果矩阵中就只有你对第一层的卷积，在RGB图片中，你就只检测了红色通道的边缘。</p>
+<p>更常用的是，你可以同时使用多个卷积核，然后把得到的结果堆叠，得到通道数大于1的结果：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D04.png" class="" title="三维数据卷积04">
+<p><strong>所以卷积结果矩阵的通道数，取决于卷积核的数量，记住这一点。</strong></p>
+<h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><p>介绍了这么多，我们拉通来看一下，把上述知识点结合起来，就是卷积神经网络的一层：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aLayerInConvNet.png" class="" title="卷及网络中的一层">
+<p>之前我们说过，每一个过滤器(卷积核)都相当于是过滤出原数据的一个特性。上图中，用了2个过滤器，将每个过滤器得到的结果再进行一次激活。激活函数可以说是神经网络中的一种重要工具，一般是一个非线性函数，可以简单地理解为将数据中的特点放大并且保证了多层网络的实用性。激活之后再重叠在一起，就得到了我们最后4×4×2的结果。</p>
+<p>如果你知道普通神经网络的结构，它每一层的运算就是先进行 z[l] = W*a[l-1] + b[l]，再进行 a[l] = g(z[l])。可以看到对于我们的卷积神经网络，这一层的操作，也可以对应成这个公式，过滤器就是我们的W。</p>
+<p>既然过滤器是我们W，上面我们也说过过滤器的值可以训练，那么这么一层卷积网络，我们需要训练多少参数呢？<br>假设我们有10个3×3×3的过滤器，那么我们需要 3×3×3×10 + 10(b参数，偏差值) 个，即280个参数。</p>
+<h3 id="ConvNet中的符号"><a href="#ConvNet中的符号" class="headerlink" title="ConvNet中的符号"></a>ConvNet中的符号</h3><p>在卷积网络中，你会看到很多各种符号以及参数、中间值，结果的维度，我们稍作总结：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/notaionInConvNet.png" class="" title="卷积网络中的符号">
+
+<p>以上就是卷积网络中的一层了，那么我们如何扩展它来构建一个卷积网络呢？</p>
+<p>PS: ConvNet是卷积神经网络的简写</p>
+<h3 id="一个简单的例子"><a href="#一个简单的例子" class="headerlink" title="一个简单的例子"></a>一个简单的例子</h3><p>现在假如你有一些照片，你想通过卷积网络来实现图片的分类，假如输入图片的大小为39×39×3：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aBriefConvNet.png" class="" title="一个简单的卷积网络结构">
+<p>接着，我们可以把最后这个7×7×40的矩阵展开成1960的向量，接着我们可以使用普通神经网络的手段，使用逻辑回归或者一个softmax层来进行最后结果的计算。</p>
+<p>从上面可以看出一个大多数卷积神经网络的趋势，即随着层数的增加，矩阵的宽高会逐渐减小，而通道数量会逐渐增加。</p>
+<h3 id="其它的层类型"><a href="#其它的层类型" class="headerlink" title="其它的层类型"></a>其它的层类型</h3><p>上面的网络中，这些使用卷积核的层都可以叫做卷积层，但神经网络层中还有一些其他的层类型，比如池化(pooling)层，全连接(full connect/FC)层等。<br>将卷积层与这二者结合，我们可以搭建出更好的卷积神经网络。</p>
+<h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>在ConvNet中，经常会使用一种叫做池化层(pooling layer)的结构来减小表示层的大小，从而加快模型训练，甚至更好的发现一些特性。</p>
+<p>下面介绍两种池化层</p>
+<h3 id="最大值-Max-池化"><a href="#最大值-Max-池化" class="headerlink" title="最大值(Max)池化"></a>最大值(Max)池化</h3><p>非常简单，如下：</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/maxPooling.png" class="" title="最大值池化">
+<p>虽然很简单，但max池化在很多的实际应用中都有很好的效果。为什么呢？<br>直白的理解一下，加入你把这个4×4的区域看作某个特征的集合，即神经网络某个层中的激活状态，那么一个大的数字意味着算法可能检测到了一个特定的特征，如上图左上的2*2区域就有这样的特征，8被挑选并保留下来，它可能是一个垂直边缘，可能是一个任何难以描述的特征，而右上区域没有这样的特征，它的最大值依然很小。<br>所以，max pooling作所做的其实是 ，如果在过滤器中任何地方检测到了任何特征，就保留最大的数值。<br>反之，如果没有明显的特征被检测到，比如右上方的四分之一区域就没有这个特征，在结果中那些数值的最大值仍然相当小。</p>
+<h3 id="平均值池化"><a href="#平均值池化" class="headerlink" title="平均值池化"></a>平均值池化</h3><img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/avgPooling.png" class="" title="平均值池化">
+<p>就不介绍了…</p>
+<h3 id="池化层特点"><a href="#池化层特点" class="headerlink" title="池化层特点"></a>池化层特点</h3><p>最大值池化的使用通常比均值池化多得多。<br>也许你注意到了，大多数池化层都不需要学习超参数，只要确定了f和s，计算就确定了。<br>而且如果输入数据是3维的，则结果中通道数量依然保持，即每一层都像第一层一样进行过滤。</p>
+<h2 id="卷积网络样例"><a href="#卷积网络样例" class="headerlink" title="卷积网络样例"></a>卷积网络样例</h2><p>todo…</p>
+<h2 id="卷积为什么有用"><a href="#卷积为什么有用" class="headerlink" title="卷积为什么有用"></a>卷积为什么有用</h2><p>比起一般的全连接神经网络，卷积神经网络主要有2个优势，参数共享和连接稀疏性。</p>
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/whyCcnvWork.png" class="" title="例图"> 
+<p>举个例子，如上图，第一层共32×32×3 = 3072个输入，第二层共4704个输出。使用如上所示的卷积，我们只需要(5×5×3+1)×6一共456个参数。而如果我们使用全连接层，我们需要多少参数呢？一共3072×4704个参数，多太多了。</p>
+<p>卷积网络的参数少，主要是两个原因。</p>
+<h3 id="参数共享"><a href="#参数共享" class="headerlink" title="参数共享"></a>参数共享</h3><p>每一次卷积的时候，我们的卷积核一直被轮流地使用，输入数据的每一个部分都与过滤器进行了计算。<br>所谓共享即卷积核的共享。</p>
+<h3 id="连接的稀疏性"><a href="#连接的稀疏性" class="headerlink" title="连接的稀疏性"></a>连接的稀疏性</h3><p>也很好理解，比如看上图，卷积后结果矩阵的每一个值，都只是原输入数据的一个3*3的数据与过滤器发生计算得到的，不像全连接要关联所有输入值。</p>
+<p>更多，也有人说卷积可以捕捉平移不变，即是说一张图片的像素右移或左移了一些像素，它们依然应该有相同的特征。卷积可以给他们打上相同的标签。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是卷积神经网络的基本概念，通过tensorflow等软件包你也可以很轻松的实现各种自定义的网络类型。但一般的实际应用中，并不推荐自由构建网络结构，因为卷积网络的训练时间普遍较长，所以当你要建立一个卷积网络来解决一个新的问题时，去尝试想当然的网络结构往往得不偿失。一个好的方法就是多从各大论文或者成功模型的分享中获得灵感，在别人推荐的模型和超参数的基础上构建你的网络，才能事半功倍。</p>
+<p>之后会介绍一些经典的卷积网络模型。</p>
 
       
     </div>
