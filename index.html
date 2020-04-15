@@ -150,6 +150,189 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Toulon Du">
+      <meta itemprop="description" content="Sharing Knowledge And Learn More">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Toulon's BLOG">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/" class="post-title-link" itemprop="url">机器学习中的各种优化器算法</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-16 00:20:14 / 修改时间：00:40:42" itemprop="dateCreated datePublished" datetime="2020-04-16T00:20:14+08:00">2020-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">基础算法</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>深度学习中的优化器有很多种，除了我们熟悉的梯度下降外，还有一些诸如 RMSProp，adam 等优秀的优化器。来了解一波~</p>
+<h2 id="梯度下降-GD-BGD-MBGD"><a href="#梯度下降-GD-BGD-MBGD" class="headerlink" title="梯度下降 GD,BGD,MBGD"></a>梯度下降 GD,BGD,MBGD</h2><p>梯度下降（GD：gradient descent）大家都很熟悉，这里也不做详细介绍。整体就是先初始化求解参数，然后通过求解损失函数对求解参数的导数来对我们的求解参数进行更新，直到收敛。 </p>
+<p>梯度下降分为BGD（batch：批量梯度下降），SGD（stochastic：随机梯度下降）和 MBGD(Mini-Batch：小批量梯度下降)，区别在于每次更新梯度时使用的样本的数量，分别为全部样本，单个样本和一部分样本。</p>
+<p>梯度下降找到的最优解一般为函数的一个鞍点，即局部最优解。<br>MBGD和SGD因为样本较少，随机性太强，梯度往往震荡很大，如下：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/GDvsMBGD.png" class="" title="GDvsMBGD">
+
+<p>要解决这个问题，使用MBGD进行优化时我们可以对学习率进行衰减来使之收敛。</p>
+<p>PS:因为计算机本身的一些性质，将批次量设置为2的幂数计算会更快。</p>
+<p>当然，还有比小批次下降更快的算法。但在学习它们之前，我们首先要了解指数加权平均。</p>
+<h2 id="指数加权平均"><a href="#指数加权平均" class="headerlink" title="指数加权平均"></a>指数加权平均</h2><p>什么是指数加权平均？</p>
+<p>参考吴恩达老师对此的讲解，用一个例子来进行说明：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/LondonTempreture.png" class="" title="LondonTempreture">
+
+<p>上图是伦敦一年之中每天的温度情况，我们来对它做一些处理，把每天的温度值记作Vn。则：<br>V0=0， V1 = 0.9*V0 + 0.1*θ1， V2=0.9V1 + 0.1*θ2，…<br>θ为上图中当天真实的温度值，这个0.9我们记作β，那么公式记为：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/formulaVt.png" class="" title="formulaVt">
+
+<p>稍微进行一下联想，这个V可以近似看做是之前1/(1-β)天的平均值，当我们分别取β=0.9(红色曲线)和0.98(绿色曲线)时，图像为：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/TempretureHandled.png" class="" title="TempretureHandled">
+
+<p>β取0.9，我们把这个式子展开：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/UnfoldFormulaV.png" class="" title="UnfoldFormulaV">
+
+<p>θ随着时间推后是β的指数级衰减，且一般来说，指数加权的衰减大约会在1/(1-β)后衰减到大约三分之一的程度，比如0.9的1/(1-0.9)次方约等于0.35，所以我们说它大约是最近10天的平均值。这就是指数加权平均名称的由来。</p>
+<p>指数加权平均减少了存储空间的使用，当我们需要某个V的值时，只需要通过计算即可获得，因此它在机器学习中得到了大量的应用。</p>
+<p>细心的你可能注意到，我们的V0取值为0，这会在计算初期的时候产生较大的误差值。<br>因此在很多时候，我们会对V的值进行<strong><em>偏差修正</em></strong>。<br>使 Vt = Vt/(1-β^t)  ，从而对Vt进行放大，而随着t的增大，放大率会逐渐趋于1。</p>
+<p>有了这个基础，我们就可以介绍一些其它的优化器方法。</p>
+<h2 id="动量梯度算法（momentum）"><a href="#动量梯度算法（momentum）" class="headerlink" title="动量梯度算法（momentum）"></a>动量梯度算法（momentum）</h2><p>算法的主要思想其实很简单，就是把我们刚才学习的指数加权平均用来计算梯度，然后用计算得到的梯度来进行参数更新。<br>在上面的梯度下降算法中，考虑多维度的情况，如下：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/momentumExample.png" class="" title="momentumExample">
+
+<p>于收敛来说，竖直方向的震荡显然是无益的，我们希望能够减小竖直方向的震荡。</p>
+<p>动量梯度下降的步骤如下<br>第t次迭代：</p>
+<ol>
+<li>用当前小批量样本 计算 参数W和 偏差b的导数</li>
+<li>Vdw = βVdw + (1-β)dw， Vdb = βVdb + (1-β)db</li>
+<li>W := W - αVdw,   b := b-αVdb </li>
+</ol>
+<p>end<br>我们还是对批次数量进行迭代，整个算法中中有2个超参数，α和β，α为学习率，β是我们上面学习到的指数加权。</p>
+<p>为什么咋这么做可以有效呢？因为指数加权平均的平均，它就让垂直方向上相反的震荡被平均从而变小，而水平方向的震荡方向是相同的，平均值依然很大，故整体收敛速度就加快了。</p>
+<p>PS:动量梯度下降时基本不用偏差修正，β基本都是选择0.9。</p>
+<h2 id="RMSprop"><a href="#RMSprop" class="headerlink" title="RMSprop"></a>RMSprop</h2><p>RMSprop全称为均方根传递(Root Mean Square prop), 它也可以加速梯度下降。<br>计算方式如下：</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/RMSPropStep.png" class="" title="RMSPropStep">
+
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/RMSPropImg.png" class="" title="RMSPropImg">
+<p>RMSprop主要的思想是缩小大的震荡，加快小的震荡。如上图，垂直方向的震荡很大，而水平方向很小，RMSprop就会缩小垂直方向的震荡，加快水平方向的速度。<br>原理很简单，如果垂直方向的震荡较大，那么Sdb就会很大，那么作为除数，更新速度就减慢了，相反，水平方向较慢，Sdw就较小，W的更新速度就加快了。<br>当然，实际应用中，并没有垂直水平这么简单，我们加快的是慢的维度，减慢的是快的维度。<br>而且为了防止除0发生，通常在分母上我们会加一个很小的EPSON，大概10e-8</p>
+<p>接下来，我们把RMSprop和动量结合起来，会得到一个更好的优化算法。<br>为了防止冲突，RMSprop中的β，我们用β_2表示</p>
+<h2 id="Adam"><a href="#Adam" class="headerlink" title="Adam"></a>Adam</h2><p>adaptive moment estimation 自适应矩估计<br>adam优化算法实际上就是将RMSprop和动量梯度下降结合起来的算法。<br>在机器学习领域和深度学习领域中，曾经提出了非常多的优化算法，但大多数算法都不能很好的适应于不同的网络结构，adam算法是少有的在非常多网络结构中都能够产生非常好效果的算法。</p>
+<p>在机器学习领域和深度学习领域中，曾经提出了非常多的优化算法，比如Adagrad,Adadelta等，但大多数算法都不能很好的适应于不同的网络结构，adam算法是少有的在非常多网络结构中都能够产生非常好效果的算法。</p>
+<p>初始化Vdw，Sdw,  Vdb, Sdb为0</p>
+<img src="/2020/04/16/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E4%B8%AD%E7%9A%84%E5%90%84%E7%A7%8D%E4%BC%98%E5%8C%96%E5%99%A8%E7%AE%97%E6%B3%95/AdamStep.png" class="" title="AdamStep">
+
+<p>l为网络层数，两个β分别是动量梯度和RMSprop中的加权，α为学习率，同样，为了防止除0发生，通常在分母上我们会加一个很小的EPSON，大概10e-8（上图没加）。</p>
+<p>几个超参数，一般β1选择0.9，β2选择0.999，EPSON选择10e-8。<br>而α，一个好的方法就是逐渐减小学习速率，使用一个衰减率来对学习率进行衰减。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/04/03/BERT%E7%AC%94%E8%AE%B0-%E7%AE%80%E4%BB%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Toulon Du">
+      <meta itemprop="description" content="Sharing Knowledge And Learn More">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Toulon's BLOG">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/04/03/BERT%E7%AC%94%E8%AE%B0-%E7%AE%80%E4%BB%8B/" class="post-title-link" itemprop="url">BERT笔记-简介</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-04-03 13:48:42 / 修改时间：13:56:09" itemprop="dateCreated datePublished" datetime="2020-04-03T13:48:42+08:00">2020-04-03</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>BERT，全名 Bidirectional Encoder Representation from Transformers。是Google AI团队在2018年推出的一个NLP模型，在机器阅读理解顶级水平测试SQuAD1.1上全面超越人类表现，并在11项NLP测试中拿到最佳成绩。这也导致BERT的大火。</p>
+<p>BERT的出现彻底改变了pre-train产生词向量和下游NLP训练任务间的关系。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/04/02/Transformer%E6%A8%A1%E5%9E%8B%E7%AE%80%E4%BB%8B-%E7%AC%94%E8%AE%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -708,16 +891,16 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">3</span>
+          <span class="site-state-item-count">5</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
