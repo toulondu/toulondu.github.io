@@ -150,6 +150,128 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Toulon Du">
+      <meta itemprop="description" content="Sharing Knowledge And Learn More">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Toulon's BLOG">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/" class="post-title-link" itemprop="url">边写代码边学习Mask-rcnn</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-19 00:42:15 / 修改时间：03:17:03" itemprop="dateCreated datePublished" datetime="2020-05-19T00:42:15+08:00">2020-05-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>作为一个深度学习的学习者，你是不是苦于自己看了非常多的理论却难以下手实践？是否总觉得自己还没到写代码的时候？<br>如果你这么想，那么你看再多的理论，也无法真正踏进深度学习的大门。<br>就我个人而言，很多时候即使读完了论文仍然有点懵，很多地方感觉都一知半解，还有些地方可能直接就是不太明白。此时，如果能有源码看一看，才能真正将这篇文章搞明白。<br>so, “talk is cheap, show me the code” 实乃金玉良言。</p>
+<p>这篇文章将使用pytorch modelzoo提供的现成Mask R-CNN预训练模型来进行fine-turing，实现一个目标检测和语义分割应用。并且在这个过程中来重新复习一下Mask R-CNN这个经典网络的一些原理。  </p>
+<h2 id="Mask-R-CNN简介"><a href="#Mask-R-CNN简介" class="headerlink" title="Mask R-CNN简介"></a>Mask R-CNN简介</h2><p>Mask R-CNN来自何恺明大神2017年的论文，是一个通用的目标检测和实例分割的模型。它基于作者团队在2015年提出的faster rcnn模型，最主要的改动就是增加了一个分支来用于分割任务。<br>Mask R-CNN是anchor-based的模型，依然采用Faster RCNN的2-stage结构，首先用RPN找出候选region，然后在此基础上计算ROI并完成分类、检测和分割任务。<br>并没有添加各种trick，Mask RCNN就超过了当时所有的sota模型。</p>
+<h2 id="定义DataSet并处理"><a href="#定义DataSet并处理" class="headerlink" title="定义DataSet并处理"></a>定义DataSet并处理</h2><p>我们将使用Penn-Fudan数据库中的行人图片数据来对模型进行微调。它包含170个图像和345个行人实例。<a href="https://www.cis.upenn.edu/~jshi/ped_html/PennFudanPed.zip" target="_blank" rel="noopener">数据在此</a>。<br>数据文件结构大致如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">PennFudanPed&#x2F;</span><br><span class="line">  PedMasks&#x2F;</span><br><span class="line">    FudanPed00001_mask.png</span><br><span class="line">    FudanPed00002_mask.png</span><br><span class="line">    FudanPed00003_mask.png</span><br><span class="line">    FudanPed00004_mask.png</span><br><span class="line">    ...</span><br><span class="line">  PNGImages&#x2F;</span><br><span class="line">    FudanPed00001.png</span><br><span class="line">    FudanPed00002.png</span><br><span class="line">    FudanPed00003.png</span><br><span class="line">    FudanPed00004.png</span><br></pre></td></tr></table></figure>
+<p>PedMasks中数据为PNGImages文件夹下对应图片的实例分割掩膜，如下：</p>
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/mask_sample.png" class="" title="原图片">
+
+<p>即掩膜中不同的数值对应不同的实例的分割。</p>
+<h3 id="定义Dataset类"><a href="#定义Dataset类" class="headerlink" title="定义Dataset类"></a>定义Dataset类</h3><p>上一篇文章说过，Dataset类是帮助我们处理原始数据并产出模型需要的输入数据的类。<br>而在我们这次的Mask R-CNN模型中，我们希望Dataset通过<strong>getitem</strong>能返回我们图像数据(H,W)以及图像的以下信息：</p>
+<ul>
+<li>boxes: 这张图片里所有的目标区域,格式为[x0,x1,y0,y1]，x∈[0,W], y∈[0,H]</li>
+<li>labels: 每个边框的标签</li>
+<li>masks: 每个图像的掩膜</li>
+<li>image_id: 图片id</li>
+<li>area：每个bbox的面积，用于计算IoU</li>
+<li>iscrowd: 每个区域是否是人群<br>代码如下：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line">class PennFudanDataset(Dataset):</span><br><span class="line">    def __init__(self, root, transforms):</span><br><span class="line">        self.root &#x3D; root</span><br><span class="line">        self.transforms &#x3D; transforms</span><br><span class="line">        # 下载所有图像文件，为其排序。确保它们对齐,而且这样就把图片名字列出来了，方便了加载图片</span><br><span class="line">        self.imgs &#x3D; list(sorted(os.listdir(os.path.join(root, &quot;PNGImages&quot;))))</span><br><span class="line">        self.masks &#x3D; list(sorted(os.listdir(os.path.join(root, &quot;PedMasks&quot;))))</span><br><span class="line"></span><br><span class="line">    def __getitem__(self, idx):</span><br><span class="line">        # load images ad masks</span><br><span class="line">        img_path &#x3D; os.path.join(self.root, &quot;PNGImages&quot;, self.imgs[idx])</span><br><span class="line">        mask_path &#x3D; os.path.join(self.root, &quot;PedMasks&quot;, self.masks[idx])</span><br><span class="line">        img &#x3D; Image.open(img_path).convert(&quot;RGB&quot;)</span><br><span class="line">        # 请注意我们还没有将mask转换为RGB,</span><br><span class="line">        # 因为每种颜色对应一个不同的实例。0是背景</span><br><span class="line">        mask &#x3D; Image.open(mask_path)</span><br><span class="line">        # 将PIL图像转换为numpy数组</span><br><span class="line">        mask &#x3D; np.array(mask)</span><br><span class="line">        # 实例被编码为不同的颜色</span><br><span class="line">        obj_ids &#x3D; np.unique(mask)</span><br><span class="line">        # 第一个id是背景(即0)，所以删除它</span><br><span class="line">        obj_ids &#x3D; obj_ids[1:]</span><br><span class="line"></span><br><span class="line">        # 将相同颜色编码的mask分成一组</span><br><span class="line">        # mask为2维，用None扩充obj_ids维度，masks为3维，因为一张图片可能有多个实例分割</span><br><span class="line">        # 二进制格式</span><br><span class="line">        masks &#x3D; mask &#x3D;&#x3D; obj_ids[:, None, None]</span><br><span class="line"></span><br><span class="line">        # 获取每个mask的边界框坐标</span><br><span class="line">        num_objs &#x3D; len(obj_ids)</span><br><span class="line">        boxes &#x3D; []</span><br><span class="line">        for i in range(num_objs):</span><br><span class="line">            # masks[i]为2维，所以np.where返回2个tuple，分别为此颜色编码的元素在各个维度的下标</span><br><span class="line">            # 这里的数据中不同颜色的mask是语义分割的像素点，选出最大最小的x坐标和y坐标就得到了目标区域(x0,y0),(x1,y1)</span><br><span class="line">            pos &#x3D; np.where(masks[i])</span><br><span class="line">            xmin &#x3D; np.min(pos[1])</span><br><span class="line">            xmax &#x3D; np.max(pos[1])</span><br><span class="line">            ymin &#x3D; np.min(pos[0])</span><br><span class="line">            ymax &#x3D; np.max(pos[0])</span><br><span class="line">            boxes.append([xmin, ymin, xmax, ymax])</span><br><span class="line"></span><br><span class="line">        # 将所有转换为torch.Tensor</span><br><span class="line">        boxes &#x3D; torch.as_tensor(boxes, dtype&#x3D;torch.float32)</span><br><span class="line">        # 我们只检测行人这一个类(行人，所以直接全部置为1)</span><br><span class="line">        labels &#x3D; torch.ones((num_objs,), dtype&#x3D;torch.int64)</span><br><span class="line">        masks &#x3D; torch.as_tensor(masks, dtype&#x3D;torch.uint8)</span><br><span class="line"></span><br><span class="line">        image_id &#x3D; torch.tensor([idx])</span><br><span class="line">        area &#x3D; (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])</span><br><span class="line">        # 假设所有实例都不是人群</span><br><span class="line">        iscrowd &#x3D; torch.zeros((num_objs,), dtype&#x3D;torch.int64)</span><br><span class="line"></span><br><span class="line">        target &#x3D; &#123;&#125;</span><br><span class="line">        target[&quot;boxes&quot;] &#x3D; boxes  # 这张图片里所有的目标区域</span><br><span class="line">        target[&quot;labels&quot;] &#x3D; labels   # 每个目标区域的类型</span><br><span class="line">        target[&quot;masks&quot;] &#x3D; masks    # 图像掩膜 mask</span><br><span class="line">        target[&quot;image_id&quot;] &#x3D; image_id  # 图片id</span><br><span class="line">        target[&quot;area&quot;] &#x3D; area          # 每个区域的面积</span><br><span class="line">        target[&quot;iscrowd&quot;] &#x3D; iscrowd    # 每个区域是否是人群(这里假设的都不是)</span><br><span class="line"></span><br><span class="line">        if self.transforms is not None:</span><br><span class="line">            img, target &#x3D; self.transforms(img, target)</span><br><span class="line"></span><br><span class="line">        return img, target</span><br><span class="line">        </span><br><span class="line">    def __len__(self):</span><br><span class="line">        return len(self.imgs)</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="定义模型"><a href="#定义模型" class="headerlink" title="定义模型"></a>定义模型</h3><p>Mask-RCNN结构如下：</p>
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/mask_rcnn_model.jpg" class="" title="模型结构">
+<p>torchvision.models.detection.fasterrcnn_resnet50_fpn(pretrained=True) 为我们提供了一个预训练的Mask-RCNN模型。<br>修改这种预训练模型一般有2种思路，第一就是当我们数据较少时，我们就只将最后一层替换成我们的输入目标，然后进行微调。<br>另一种思路则是可以在原模型基础上进行修改，比如替换backbone，修改RPN的anchor数量，调整ROI维度等。  </p>
+<p>我们先来看看第二种方式：<br><strong>修改backbone</strong>: Mask-RCNN 的backbone使用的Resnet101，整体还是比较大的，假如你想使用一些轻量的backbone，比如mobileNet，那么你可以进行替换<br><strong>修改rpn</strong>:Mask-RCNN 的anchor是如何生成的呢，注意看上面的结构图。输入数据在经过backbone之后，得到的feature-map其实是在原输入的基础上进行了32倍下采样。基于这个feature-map的每个元素，我们再进行一个3×3的卷积来增加感受野，然后对每个元素生成9个anchor来生成候选区域。这9个初始anchor包含3种长宽比(1:1,1:2,2:1),每种长宽比包含3种不同的面积。结构如下：</p>
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/rpn_structure.jpg" class="" title="rpn结构">
+<p>注意图上的各种数字，256表示的是骨干网络输出的通道数，k表示生成的anchor的数量。因为每个anchor有positive和negative，所以有2k个打分。而每个anchor会经过后续的回归找到针对正确区域的4个偏移量(x,y,w,h)，所以是4k个coordinates。<br>对于这些参数，我们也可以修改。<br><strong>修改RoI pooling</strong>：RoI pooling层复杂收集proposal，然后选取特征并送入后续的分类和检测FC网络。 要知道为了保留图片中事物的特性，我们很少对图片采用resize或者裁剪操作，而Mask-RCNN接受不同大小的图片输入，那么经过骨干和RPN网络后，各图片到此时的数据维度是不一样的。这种情况下我们没有办法通过FC等网络进行特征组合。RoI pooling层就是来解决这个问题的。它将收集到的proposal分为固定个数的区域(比如7*7)，然后对每这些区域使用max_pool处理，这样就得到了固定维度的输出。<br>其次，Faster RCNN在处理RoI pooling的过程中有2次取整操作：</p>
+<ul>
+<li>region proposal的xywh通常是小数，但是为了方便操作会把它整数化。</li>
+<li>将整数化后的边界区域平均分割成 k x k 个单元，对每一个单元的边界进行整数化。<br>这将会导致RoI pooling后的输出与原图像对应的区域产生一些偏离，导致不能完全对应。第一个问题很好解决，不再取整即可。而解决第二个问题，则是使用双线性插值的方式来更加精确的找到每个边界的特征。我们在下面代码中看到的sampling_ratio=2就是这个方法的体现。</li>
+</ul>
+<p>代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">from torchvision.models.detection import FasterRCNN</span><br><span class="line">from torchvision.models.detection.rpn import AnchorGenerator</span><br><span class="line"></span><br><span class="line"># 加载预先训练的模型进行分类和返回</span><br><span class="line"># 只有功能 </span><br><span class="line"># 主干采用mobileNet V2</span><br><span class="line">backbone &#x3D; torchvision.models.mobilenet_v2(pretrained&#x3D;True).features</span><br><span class="line"># FasterRCNN需要知道骨干网中的输出通道数量。对于mobilenet_v2，它是1280，所以我们需要在这里添加它</span><br><span class="line">backbone.out_channels &#x3D; 1280</span><br><span class="line"></span><br><span class="line"># 我们让RPN在每个空间位置生成5 x 3个锚点 PS：这里原文是3*3，即3种大小3种宽高比</span><br><span class="line"># 改成5种不同的大小和3种不同的宽高比。 </span><br><span class="line"># 因为每个特征映射可能具有不同的大小和宽高比，size为anchor box大小，aspect_ratios则是宽高比</span><br><span class="line">anchor_generator &#x3D; AnchorGenerator(sizes&#x3D;((32, 64, 128, 256, 512),),</span><br><span class="line">                                   aspect_ratios&#x3D;((0.5, 1.0, 2.0),))</span><br><span class="line"></span><br><span class="line"># 定义一下我们将用于执行感兴趣区域裁剪的特征映射，以及重新缩放后裁剪的大小。 </span><br><span class="line"># 如果您的主干返回Tensor，则featmap_names应为[0]。 </span><br><span class="line"># 更一般地，主干应该返回OrderedDict [Tensor]</span><br><span class="line"># 并且在featmap_names中，您可以选择要使用的功能映射。</span><br><span class="line"># 这里为RoIPooling层，将feature_map对应的原图中部分处理成7*7(output_size&#x3D;7)的大小然后再进行后续的分类和回归操作</span><br><span class="line"># 而sampling_ratio&#x3D;2则是原文中进行插值所选取的采样点，简单的说：采样点为2就是说7*7的每个区域内，都要再分成2*2个grid，然后对每个grid中心点进行采样，将这4个点的值求平均就是这个区域最终的值。</span><br><span class="line">roi_pooler &#x3D; torchvision.ops.MultiScaleRoIAlign(featmap_names&#x3D;[0],</span><br><span class="line">                                                output_size&#x3D;7,</span><br><span class="line">                                                sampling_ratio&#x3D;2)</span><br><span class="line"></span><br><span class="line"># 将这些pieces放在FasterRCNN模型中</span><br><span class="line">model &#x3D; FasterRCNN(backbone,</span><br><span class="line">                   num_classes&#x3D;2,</span><br><span class="line">                   rpn_anchor_generator&#x3D;anchor_generator,</span><br><span class="line">                   box_roi_pool&#x3D;roi_pooler)</span><br></pre></td></tr></table></figure>
+
+
+<p>虽然第二种方式明显比较酷，但鉴于本示例中样本数据比较少，所以我们使用第一种方式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">def get_model_instance_segmentation(num_classes):</span><br><span class="line">    # 加载在COCO上预训练的预训练的实例分割模型</span><br><span class="line">    model &#x3D; torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained&#x3D;True)</span><br><span class="line"></span><br><span class="line">    # 获取分类器的输入特征数</span><br><span class="line">    in_features &#x3D; model.roi_heads.box_predictor.cls_score.in_features</span><br><span class="line">    # 用新的头部替换预先训练好的头部</span><br><span class="line">    model.roi_heads.box_predictor &#x3D; FastRCNNPredictor(in_features, num_classes)</span><br><span class="line"></span><br><span class="line">    # 现在获取掩膜分类器的输入特征数</span><br><span class="line">    in_features_mask &#x3D; model.roi_heads.mask_predictor.conv5_mask.in_channels</span><br><span class="line">    hidden_layer &#x3D; 256</span><br><span class="line">    # 并用新的掩膜预测器替换掩膜预测器</span><br><span class="line">    model.roi_heads.mask_predictor &#x3D; MaskRCNNPredictor(in_features_mask,</span><br><span class="line">                                                       hidden_layer,</span><br><span class="line">                                                       num_classes)</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="实例化模型"><a href="#实例化模型" class="headerlink" title="实例化模型"></a>实例化模型</h3><p>在torchvision的官方库中，references/detection/里有很多辅助函数来简化训练和评估检测模型。<br>这里我们需要用到references/detection/engine.py，references/detection/utils.py和references/detection/transforms.py。<br>去<a href="https://github.com/pytorch/vision" target="_blank" rel="noopener">这里</a> download代码并将这几个文件拷贝到你的目录中即可。</p>
+<p>其次，提前安装<a href="https://github.com/cocodataset/cocoapi/tree/master/PythonAPI" target="_blank" rel="noopener">cocoapi</a>,如果你在windows上，可能需要安装visial studio。<br>windows上也可以通过安装pycocotools来解决。whl见：<a href="https://pypi.org/project/pycocotools-windows/#files" target="_blank" rel="noopener">https://pypi.org/project/pycocotools-windows/#files</a></p>
+<p>这一步没什么好说的，代码里也有足够的注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"># 训练阶段按0.5几率水平翻转图像</span><br><span class="line">def get_transform(train):</span><br><span class="line">    transforms &#x3D; []</span><br><span class="line">    transforms.append(T.ToTensor())</span><br><span class="line">    if train:</span><br><span class="line">        transforms.append(T.RandomHorizontalFlip(0.5))</span><br><span class="line">    return T.Compose(transforms)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 在GPU上训练，若无GPU，可选择在CPU上训练</span><br><span class="line">device &#x3D; torch.device(&#39;cuda&#39;) if torch.cuda.is_available() else torch.device(&#39;cpu&#39;)</span><br><span class="line"></span><br><span class="line"># 我们的数据集只有两个类 - 背景和人</span><br><span class="line">num_classes &#x3D; 2</span><br><span class="line"># 使用我们的数据集和定义的转换</span><br><span class="line">dataset &#x3D; PennFudanDataset(&#39;data&#x2F;PennFudanPed&#39;, get_transform(train&#x3D;True))</span><br><span class="line">dataset_test &#x3D; PennFudanDataset(&#39;data&#x2F;PennFudanPed&#39;, get_transform(train&#x3D;False))</span><br><span class="line"></span><br><span class="line"># 在训练和测试集中拆分数据集</span><br><span class="line">indices &#x3D; torch.randperm(len(dataset)).tolist()</span><br><span class="line">dataset &#x3D; torch.utils.data.Subset(dataset, indices[:-50])</span><br><span class="line">dataset_test &#x3D; torch.utils.data.Subset(dataset_test, indices[-50:])</span><br><span class="line"></span><br><span class="line"># 定义训练和验证数据加载器</span><br><span class="line">data_loader &#x3D; torch.utils.data.DataLoader(</span><br><span class="line">    dataset, batch_size&#x3D;2, shuffle&#x3D;True, num_workers&#x3D;4,</span><br><span class="line">    collate_fn&#x3D;utils.collate_fn)</span><br><span class="line"></span><br><span class="line">data_loader_test &#x3D; torch.utils.data.DataLoader(</span><br><span class="line">    dataset_test, batch_size&#x3D;1, shuffle&#x3D;False, num_workers&#x3D;4,</span><br><span class="line">    collate_fn&#x3D;utils.collate_fn)</span><br><span class="line"></span><br><span class="line"># 使用我们的辅助函数获取模型</span><br><span class="line">model &#x3D; get_model_instance_segmentation(num_classes)</span><br><span class="line"></span><br><span class="line"># 将我们的模型迁移到合适的设备</span><br><span class="line">model.to(device)</span><br></pre></td></tr></table></figure>
+
+<h3 id="训练阶段"><a href="#训练阶段" class="headerlink" title="训练阶段"></a>训练阶段</h3><p>我们使用SGD进行优化，训练10个epoch。并且通过比较在测试集上的mAP，保存效果最好的参数到best_state_dict中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">def train():</span><br><span class="line">    # 构造一个优化器</span><br><span class="line">    params &#x3D; [p for p in model.parameters() if p.requires_grad]</span><br><span class="line">    optimizer &#x3D; torch.optim.SGD(params, lr&#x3D;0.005,</span><br><span class="line">                                momentum&#x3D;0.9, weight_decay&#x3D;0.0005)</span><br><span class="line">    # 和学习率调度程序</span><br><span class="line">    lr_scheduler &#x3D; torch.optim.lr_scheduler.StepLR(optimizer,</span><br><span class="line">                                                   step_size&#x3D;3,</span><br><span class="line">                                                   gamma&#x3D;0.1)</span><br><span class="line"></span><br><span class="line">    # 训练10个epochs</span><br><span class="line">    num_epochs &#x3D; 10</span><br><span class="line"></span><br><span class="line">    best_mAp &#x3D; 0</span><br><span class="line">    for epoch in range(num_epochs):</span><br><span class="line">        # 训练一个epoch，每10次迭代打印一次</span><br><span class="line">        train_one_epoch(model, optimizer, data_loader, device, epoch, print_freq&#x3D;10)</span><br><span class="line">        # 更新学习速率</span><br><span class="line">        lr_scheduler.step()</span><br><span class="line">        # 在测试集上评价</span><br><span class="line">        eval_res &#x3D; evaluate(model, data_loader_test, device&#x3D;device)</span><br><span class="line"></span><br><span class="line">        # 将结果最好的参数保存下来</span><br><span class="line">        mAp_epoch &#x3D; float(eval_res.coco_eval[&#39;bbox&#39;].stats[0])</span><br><span class="line">        if mAp_epoch &gt; best_mAp:</span><br><span class="line">            torch.save(model.state_dict(),&#39;.&#x2F;best_state_dict&#39;)</span><br><span class="line">            best_mAp &#x3D; mAp_epoch</span><br><span class="line"></span><br><span class="line">    print(&quot;Finish training the model.&quot;)</span><br></pre></td></tr></table></figure>
+<p>训练过程中你可以看到各项指标，我忘了截图，最后的COCO-style mAP大概是81左右，mask mAP为在78左右。</p>
+<h2 id="使用效果最好的参数进行预测"><a href="#使用效果最好的参数进行预测" class="headerlink" title="使用效果最好的参数进行预测"></a>使用效果最好的参数进行预测</h2><p>完成了训练，接下来肯定就是我们的show time了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">model.load_state_dict(torch.load(&#39;.&#x2F;best_state_dict&#39;))</span><br><span class="line">    # # 切换为评估模式</span><br><span class="line">    model.eval()</span><br><span class="line"></span><br><span class="line">    # 让我们瞅一瞅效果</span><br><span class="line">    img, _ &#x3D; dataset_test[0]</span><br><span class="line"></span><br><span class="line">    with torch.no_grad():</span><br><span class="line">        prediction &#x3D; model([img.to(device)])</span><br><span class="line"></span><br><span class="line">    img_ori &#x3D; Image.fromarray(img.mul(255).permute(1, 2, 0).byte().numpy())</span><br><span class="line">    draw &#x3D; ImageDraw.Draw(img_ori)</span><br><span class="line"></span><br><span class="line">    masks &#x3D; prediction[0][&#39;masks&#39;]</span><br><span class="line">    masks_all &#x3D; Image.fromarray(np.sum(np.sum(masks.mul(255).byte().cpu().numpy(),axis&#x3D;0),axis&#x3D;0))</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    for [x1,y1,x2,y2] in prediction[0][&#39;boxes&#39;]:</span><br><span class="line">        draw.rectangle([(x1,y1),(x2,y2)],outline&#x3D;(255,0,0))</span><br><span class="line"></span><br><span class="line">    imgs &#x3D; [img_ori,masks_all]</span><br><span class="line"></span><br><span class="line">    for i,im in enumerate(imgs):</span><br><span class="line">        ax &#x3D; plt.subplot(1, 2, i + 1)</span><br><span class="line">        plt.tight_layout()</span><br><span class="line">        ax.axis(&#39;off&#39;)</span><br><span class="line">        plt.imshow(im)</span><br><span class="line"></span><br><span class="line">    plt.show()</span><br></pre></td></tr></table></figure>
+<p>效果如下：</p>
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/result01.jpg" class="" title="效果图1">
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/result02.jpg" class="" title="效果图2">
+<img src="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/result03.jpg" class="" title="效果图3">
+
+
+<h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><p><a href="https://pytorch.org/tutorials/intermediate/torchvision_tutorial.html" target="_blank" rel="noopener">pytorch官网教程:TORCHVISION OBJECT DETECTION FINETUNING TUTORIAL</a><br><a href="https://arxiv.org/abs/1506.01497" target="_blank" rel="noopener">Faster R-CNN 论文</a><br><a href="https://arxiv.org/abs/1703.06870" target="_blank" rel="noopener">Mask R-CNN 论文</a>、<br><a href="https://zhuanlan.zhihu.com/p/37998710" target="_blank" rel="noopener">令人拍案称奇的Mask RCNN</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/05/15/PyTorch%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%A4%84%E7%90%86/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -173,10 +295,16 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2020-05-15 14:21:23 / 修改时间：14:24:04" itemprop="dateCreated datePublished" datetime="2020-05-15T14:21:23+08:00">2020-05-15</time>
+              <time title="创建时间：2020-05-15 14:21:23" itemprop="dateCreated datePublished" datetime="2020-05-15T14:21:23+08:00">2020-05-15</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-05-19 00:44:34" itemprop="dateModified" datetime="2020-05-19T00:44:34+08:00">2020-05-19</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
@@ -1372,7 +1500,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">8</span>
+          <span class="site-state-item-count">9</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1381,7 +1509,7 @@
         <span class="site-state-item-name">分类</span>
       </div>
       <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">8</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">标签</span>
       </div>
   </nav>
