@@ -1,241 +1,192 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
+
+
+
+
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"toulondu.github.io","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
-  </script>
-
-  <meta name="description" content="引子最近在一边写一个web qa的问答模型一边刷leetcode，前者踩坑太多耗费了超出我预期的时间(还是攻城能力欠缺啊- -)，于是文章也有一段时间没更新了。这期间抽空回顾和学习了目前工业界推荐系统常用的架构和算法，也亲自用代码实现了其中的部分算法，但总体还是停留在纸上谈兵的阶段。虽然这篇文章我脸很厚的用了“概览”这个词，但我们都知道真实的工程落地远比纯粹的算法来得复杂，除了对应实际问题的难度，">
-<meta property="og:type" content="article">
-<meta property="og:title" content="推荐系统技术概览">
-<meta property="og:url" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/index.html">
-<meta property="og:site_name" content="Toulon&#39;s BLOG">
-<meta property="og:description" content="引子最近在一边写一个web qa的问答模型一边刷leetcode，前者踩坑太多耗费了超出我预期的时间(还是攻城能力欠缺啊- -)，于是文章也有一段时间没更新了。这期间抽空回顾和学习了目前工业界推荐系统常用的架构和算法，也亲自用代码实现了其中的部分算法，但总体还是停留在纸上谈兵的阶段。虽然这篇文章我脸很厚的用了“概览”这个词，但我们都知道真实的工程落地远比纯粹的算法来得复杂，除了对应实际问题的难度，">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/recommandation-system-structure.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF01.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-derivative-theta.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-form.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_example.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_formula.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_form_vec.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/trans_M.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_final_form.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/word2vecSample.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/embedding_matrix.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/LR_formula.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/sigmoid.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/gbdt&lr.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-1-LR.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-2-feature-combine.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-formula.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-illustrate.jpg">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/FM-briefy.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/wideAndDeep.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/w&d-formula.png">
-<meta property="article:published_time" content="2020-05-01T10:32:57.000Z">
-<meta property="article:modified_time" content="2020-05-12T09:38:51.648Z">
-<meta property="article:author" content="Toulon Du">
-<meta property="article:tag" content="机器学习">
-<meta property="article:tag" content="推荐系统">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/recommandation-system-structure.png">
-
-<link rel="canonical" href="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>推荐系统技术概览 | Toulon's BLOG</title>
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
   
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="Sharing Knowledge And Learn More">
+  <meta name="author" content="Toulon Du">
+  <meta name="keywords" content="">
+  <title>推荐系统技术概览 - Toulon&#39;s BLOG</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/github-gist.min.css" />
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_fmb4a04yx8h.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
 
 
 
 
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
 
 
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Toulon's Secret</strong>&nbsp;</a>
 
-</head>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">
+              <i class="iconfont icon-home-fill"></i>
+              首页</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">
+              <i class="iconfont icon-archive-fill"></i>
+              归档</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">
+              <i class="iconfont icon-category-fill"></i>
+              目录</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">
+              <i class="iconfont icon-tags-fill"></i>
+              标签</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">
+              <i class="iconfont icon-user-fill"></i>
+              关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
     </div>
   </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Toulon's BLOG</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">Algorithm</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-  </ul>
 </nav>
 
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
 
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post">
             
+              
+                <div class="mt-3 post-meta">
+                  <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+                  <time datetime="2020-05-01 18:32">
+                    2020年5月1日 晚上
+                  </time>
+                </div>
+              
 
-  <div class="posts-expand">
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/">
+              <div class="mt-1">
+                
+                  
+                  <span class="post-meta mr-2">
+                    <i class="iconfont icon-chart"></i>
+                    6.5k 字
+                  </span>
+                
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Toulon Du">
-      <meta itemprop="description" content="Sharing Knowledge And Learn More">
-    </span>
+                
+                  
+                  <span class="post-meta mr-2">
+                      <i class="iconfont icon-clock-fill"></i>
+                    
+                    
+                    69
+                     分钟
+                  </span>
+                
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Toulon's BLOG">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          推荐系统技术概览
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-05-01 18:32:57" itemprop="dateCreated datePublished" datetime="2020-05-01T18:32:57+08:00">2020-05-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-05-12 17:38:51" itemprop="dateModified" datetime="2020-05-12T17:38:51+08:00">2020-05-12</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95/" itemprop="url" rel="index"><span itemprop="name">基础算法</span></a>
-                </span>
-            </span>
+                
+              </div>
+            
+          </div>
 
           
-
         </div>
-      </header>
+      </div>
+    </div>
+  </header>
 
+  <main>
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>最近在一边写一个web qa的问答模型一边刷leetcode，前者踩坑太多耗费了超出我预期的时间(还是攻城能力欠缺啊- -)，于是文章也有一段时间没更新了。<br>这期间抽空回顾和学习了目前工业界推荐系统常用的架构和算法，也亲自用代码实现了其中的部分算法，但总体还是停留在纸上谈兵的阶段。<br>虽然这篇文章我脸很厚的用了<strong><em>“概览”</em></strong>这个词，但我们都知道真实的工程落地远比纯粹的算法来得复杂，除了对应实际问题的难度，还会遭遇很多预想不到的困难，当然，这是题外话了~</p>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <article class="markdown-body">
+              <h2 id="引子"><a href="#引子" class="headerlink" title="引子"></a>引子</h2><p>最近在一边写一个web qa的问答模型一边刷leetcode，前者踩坑太多耗费了超出我预期的时间(还是攻城能力欠缺啊- -)，于是文章也有一段时间没更新了。<br>这期间抽空回顾和学习了目前工业界推荐系统常用的架构和算法，也亲自用代码实现了其中的部分算法，但总体还是停留在纸上谈兵的阶段。<br>虽然这篇文章我脸很厚的用了<strong><em>“概览”</em></strong>这个词，但我们都知道真实的工程落地远比纯粹的算法来得复杂，除了对应实际问题的难度，还会遭遇很多预想不到的困难，当然，这是题外话了~</p>
 <p>这篇文章基本是对我近期看的这些推荐系统算法文章和视频的一个个人的文字总结，希望自己之后有应用的机会吧~</p>
 <p>相关链接会放在文末。</p>
 <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>工业界推荐系统的架构基本在宏观上比较趋同，大都可以粗分为<strong>召回(recall)</strong>和<strong>排序(rank)</strong>两个阶段。如下：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/recommandation-system-structure.png" class="" title="推荐系统架构">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/recommandation-system-structure.png" srcset="/img/loading.gif" class="" title="推荐系统架构">
 
 <p>一般来说，平台往往动辄有上百万的item，不管是新闻应用，视频应用还是电商应用，要从海量的item中直接一步到位准确地找到推荐给某个用户的item是比较难的。 这两个阶段可以大概地看成是粗筛和精选，对某个用户来说，先通过一个比较快速而简单的方法从上百万的item中筛选出几百或者几千个高质量的item，再通过一个精确的方法仔细地将其中最好的一些item优先级确定下来，然后推荐给用户。前者就叫做召回阶段，后者则叫做排序阶段。</p>
 <p>当然，落地的时候往往还会把排序阶段再分成 粗排-主排-重排，于是变成了四个阶段，这个后面再说~</p>
@@ -250,22 +201,22 @@
 <p>这里主要介绍 CF, personal rank, item2vec等算法。</p>
 <h3 id="CF-协同过滤"><a href="#CF-协同过滤" class="headerlink" title="CF(协同过滤)"></a>CF(协同过滤)</h3><p>协同过滤是一种很老的算法，但沿用至今，它能够实现对特征进行学习的算法，即能够自行学习所需要使用的特征。</p>
 <p>算法的核心是通过学习得到2个维度较低的矩阵，一个代表用户的embedding矩阵，一个代表item的embedding矩阵，计算某个用户对于item的推荐值的时候，只需要将二者进行点积计算。再直白一点，比如电影拥有两个特征，动作属性和爱情属性，某用户A的embedding向量为θ=[5，1]，即A对电影中动作元素的偏爱为5，相对地对爱情元素的偏爱只有1。而某一部电影的X=embedding为[4，1]，那么我们将这2个向量直接进行点积，matmul(θ,transpose(X))，得到的值就是这部电影对于这个用户的推荐值，将不同电影的推荐值进行排序，其中推荐值最高的不就是应该推荐给A的电影了吗。</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF01.png" class="" title="CF图示">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF01.png" srcset="/img/loading.gif" class="" title="CF图示">
 
 <p>怎么得到这两个embedding矩阵呢？基于上面电影推荐的例子，假设我们知道每部电影的特征矩阵，即X已知 求θ。那这个问题就变成了一个很简单的线性回归问题。 已有的打分数据作为样本，我们的目标函数只需要将 θ·XT减去真实评分 作为误差，很简单就可以定义出目标函数：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png" class="" title="CF单体公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png" srcset="/img/loading.gif" class="" title="CF单体公式">
 
 <p>其中</p>
 <ul>
 <li>θ^(j)代表用户j的embedding向量。</li>
 <li>x^(i)则代表电影i的embedding向量。</li>
 <li>r(i,j)为1表示用户j已经为电影i打了分，0则表示没有。</li>
-<li>y^(i,j)为用户j给电影i的评分<br>将这个公式推广到所有用户：<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png" class="" title="CF公式">
+<li>y^(i,j)为用户j给电影i的评分<br>将这个公式推广到所有用户：<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-formula-1.png" srcset="/img/loading.gif" class="" title="CF公式">
 
 </li>
 </ul>
 <p>有了目标函数我们在将其对θ求导</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-derivative-theta.png" class="" title="Lossd对θ导数">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-derivative-theta.png" srcset="/img/loading.gif" class="" title="Lossd对θ导数">
 
 <p>然后直接用梯度下降之类的优化算法进行求解即可。</p>
 <p>同理，假设θ已知，我们也可以用同样的方式求得X。</p>
@@ -273,7 +224,7 @@
 <p>是的，你很清醒，没有被带偏，实际情况中，用户的偏好和电影的属性都很难收集，更别提特征这个东西本就虚无缥缈，爱情属性动作属性你还能够理解，真出来几百个特征，你能分清什么是什么吗?</p>
 <p>这个时候协同过滤就钻出来了，在面对这种两个未知数可以互相更新的情况下，最好的方式就是初始化其中一个未知数，然后求得另一个未知数，再反过来求第一个未知数，以此类推，在这个过程中，2个未知数就会产生协同作用，终会完成收敛，达到生命的大和谐。想想pagerank,想想EM，是不是很熟悉~</p>
 <p>除了让二者彼此更新，还可以将二者同时计算：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-form.png" class="" title="协同过滤">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/CF-form.png" srcset="/img/loading.gif" class="" title="协同过滤">
 
 <p>第一个式子是对每个用户，通过他们评价过的电影的类别来推断用户的喜好。第二个式子反过来，对每个电影，找出评价过它的用户的喜好来推断电影的类别。</p>
 <p>其实二者前半部分就是第三个式子中的第一部分，只是第三个式子取得是一个(i,j)的对，表示所有用户评分过的电影。然后把二者的正则化都加上。实际上关于第三个式子，假如你假设x为常数，它就等于第一个式子，你假设θ为常数，它就等于第二个式子。</p>
@@ -282,7 +233,7 @@
 <p>user和item构成的图是一个<strong>二分图</strong>。</p>
 <p>摘抄一下百度百科二分图的解释：<br>二分图又称作二部图，是图论中的一种特殊模型。 设G=(V,E)是一个无向图，如果顶点V可分割为两个互不相交的子集(A,B)，并且图中的每条边（i，j）所关联的两个顶点i和j分别属于这两个不同的顶点集(i in A,j in B)，则称图G为一个二分图。</p>
 <p>而对于推荐系统而言，用户和item刚好是一个二分图，顶点分为user和item两类，且所有的变都是连接一个user和一个item的。</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_example.png" class="" title="示例">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_example.png" srcset="/img/loading.gif" class="" title="示例">
 <p>如上user和item构成了一个二分图，大写ABCD表示user，小写表示item。<br>personal rank比较各个item对于某个user的推荐值基于以下规则，其重要性一次递减：</p>
 <ol>
 <li>两个顶点间有多少条路径可以连通，如上图，从A-c，有A-a-B-c, A-d-D-c两条，而从A-e只有A-b-C-e一条，则c更值得推荐。</li>
@@ -291,19 +242,19 @@
 </ol>
 <p>基于此规则，我们来介绍personal rank方法的详细操作：<br>将二分图视作无向图，对于用户A进行推荐时，我们就从A节点出发开始在图上进行随机游走，以概率α从A所有的出度中等概率选择一条前进，到达对应顶点后(比如到了b)，再次以α的概率继续从a的出度中 等概率地选择一条继续前进，或者(1-α)的概率回到起点A，经历很多步之后，统计A到达各个item节点的次数求得概率。可以证明，只要步数足够大，此概率可以收敛。</p>
 <p>把固定item对固定user的推荐得分记作PR值</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_formula.png" class="" title="personal_rank公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_formula.png" srcset="/img/loading.gif" class="" title="personal_rank公式">
 <p>其中out(v~)表示节点的出度。</p>
 <p>可以看出，和pagerank算法非常相似，某个点的PR值等于 可以连通到该点的其它点的PR值除以自身出度 的和，即如a，有A,B可以连接到它，而A出度为3，B出度为2，故PR(a) = PR(A)/3 + PR(B)/2，再乘以一个概率α。A自身的PR值还要加上一个(1-alpha)。</p>
 <p>直接迭代计算，复杂度太高了，像pagerank一样，我们也可以祭出矩阵来做：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_form_vec.png" class="" title="向量化实现">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_form_vec.png" srcset="/img/loading.gif" class="" title="向量化实现">
 <ul>
 <li>r是一个n维向量，n是图中所有的节点数量，包括user节点和item节点，值则是每个节点的PR值。</li>
 <li>r0也是一个n维向量，只有对应出发节点的元素为1，其余节点为0。</li>
-<li>M是一个n阶转移矩阵，即图中节点与节点之间转移的概率，很好理解。<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/trans_M.png" class="" title="转移矩阵M">
+<li>M是一个n阶转移矩阵，即图中节点与节点之间转移的概率，很好理解。<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/trans_M.png" srcset="/img/loading.gif" class="" title="转移矩阵M">
 这样不断将结果代入公式，r最终可以收敛。</li>
 </ul>
 <p>再对公式进行移项处理，得到：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_final_form.png" class="" title="移项处理后">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/personal_rank_final_form.png" srcset="/img/loading.gif" class="" title="移项处理后">
 
 <p>向量化实现很简单，你把r0换成矩阵试试。</p>
 <p>PS：</p>
@@ -314,10 +265,10 @@
 <h3 id="item2vec"><a href="#item2vec" class="headerlink" title="item2vec"></a>item2vec</h3><p>item2vec是一个神经网络算法，它基本是属于word2vec的衍生品。word2vec算法在诞生后，其简洁的方法和出色的效果掀起了一股万物皆可embedding的热潮，item2vec就是将word2vec应用到推荐系统上的算法。</p>
 <p>所以要说item2vec，就逃不了word2vec，word2vec是一个用于NLP的算法，由大神Tomas Mikolov在2013年的论文《Efficient estimation of word representations in vector space》中提出。word2vec是一篇跨时代的论文，在word2vec诞生前，语言中的词都是使用one-hot、tf-inf等统计学方法或者NNLM这种计算量非常大的n-gram方式进行表示的，这样就会使得数据维度特别高(语料库大小)和精度低，而且词与词的关系也被忽略了。word2vec是一种将其进行降维，并且可以表示出词与词关系的方法。而且从它开始的embedding的概念，使我们在NLP研究方面，也终于可以开始站在巨人的肩膀上了。</p>
 <p>它使用的方式就是embedding，将词用向量来表示。如下：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/word2vecSample.png" class="" title="CF公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/word2vecSample.png" srcset="/img/loading.gif" class="" title="CF公式">
 <p>每一列是一个词的向量表示，向量中的每个值可以看做是一个特征，比如king和queen在性别和皇室上都非常突出，这是非常符合直觉的。<br>注意：上图只是为了举例，真实的embedding向量中的值基本是很难解释的。</p>
 <p>要得到词的embedding,我们只需要将embedding矩阵与该词的one-hot相乘，如下：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/embedding_matrix.png" class="" title="CF公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/embedding_matrix.png" srcset="/img/loading.gif" class="" title="CF公式">
 
 <p>这个embedding矩阵如何得到呢？</p>
 <p>word2vec论文中介绍了2种方式，CBOW和skip gram。我以skip gram为例作一个简要的介绍：</p>
@@ -346,33 +297,33 @@
 <p>所以，最影响排序结果的，还是主排序部分。我们这里介绍的方法也是主排序的方法。</p>
 <h3 id="逻辑回归"><a href="#逻辑回归" class="headerlink" title="逻辑回归"></a>逻辑回归</h3><p>逻辑回归(logistic regression)这里就不展开来讲了，简单的说就是用函数关系来拟合真实的分布，然后用一个非线性的转换函数将结果拟合成分类结果。</p>
 <p>推荐系统中基于一阶特征的逻辑回归如下：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/LR_formula.png" class="" title="LR公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/LR_formula.png" srcset="/img/loading.gif" class="" title="LR公式">
 <p>上式的x1,x2,…,xn代表不同的特征，sigmoid是一个可以将函数值映射到0-1间的函数：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/sigmoid.png" class="" title="sigmoid公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/sigmoid.png" srcset="/img/loading.gif" class="" title="sigmoid公式">
 <p>接着再用交叉熵定义损失函数并用梯度下降更新求得w即可。</p>
 <p>需要注意的是样本数据的选择和清洗，比如明显的异常数据便应该去掉。<br>其次，在特征的选取上，那种只有少量数据才拥有的特征意义就不大。</p>
 <p>逻辑回归的缺点在于，要想取得好的结果，人工组合的特征不能少，但是人工特征需要不断组合、测试、调优，非常耗费人力，我们能否在模型层面自行进行特征组合呢？</p>
 <h3 id="GBDT"><a href="#GBDT" class="headerlink" title="GBDT"></a>GBDT</h3><p>单独写一篇文章来讲GBDT。<br>链接：todo..</p>
 <h3 id="GBDT-LR"><a href="#GBDT-LR" class="headerlink" title="GBDT + LR"></a>GBDT + LR</h3><p>这个思路来自于《practical lessons from predicting clikcks on ads at facebook》这篇论文。</p>
 <p>一句话就可以概括论文的主要想法：<br>逻辑回归进行融合特征时，一需要手动组合，二调参麻烦，而GBDT这种提升树模型不断用新的决策树学习残差的过程，就相当于不断地把特征变幻成了新的特征，如果把这种高维特征再放入LR模型中去训练，能不能得到更好的结果呢？</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/gbdt&lr.png" class="" title="gbdt&amp;lr-model">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/gbdt&lr.png" srcset="/img/loading.gif" class="" title="gbdt&amp;lr-model">
 <p>做法也很好实现，先训练好GBDT模型，再把每颗决策树的结果作为新的分类特征，然后使用LR模型进行训练。</p>
 <p>看起来有一些trick，但实际效果确实在很多情况下略优于二者。<br>但2个模型并不是联合训练而是单独进行训练的，二者优化目标不同，从而解释性也就弱了。</p>
 <h3 id="FM-factor-machine"><a href="#FM-factor-machine" class="headerlink" title="FM(factor machine)"></a>FM(factor machine)</h3><p>由上面的LR模型，我们有了一阶线性模型：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-1-LR.png" class="" title="lr公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-1-LR.png" srcset="/img/loading.gif" class="" title="lr公式">
 
 <p>其实很容易想到，想要融入特征组合的概念，我们只需要添加一项：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-2-feature-combine.png" class="" title="特征组合">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/state-2-feature-combine.png" srcset="/img/loading.gif" class="" title="特征组合">
 <p>将特征两两组合构成新特征，再次放入线性模型，似乎就在模型层面完成了特征组合了。</p>
 <p>其实不然，上诉方法在现实中是很难运用的，因为现实中的数据特征往往非常多，如淘宝京东的商品特征，量级超过千万。<br>这种情况下，数据矩阵是高度稀疏的，xi,xj同时不为0的可能性非常小，从而使得wij的训练几乎不可能。</p>
 <p>FM模型就是一种求解这种高阶稀疏矩阵的方式，它将wij转化成2个向量大小为k的一维向量vi和vj的內积</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-formula.png" class="" title="fm公式">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-formula.png" srcset="/img/loading.gif" class="" title="fm公式">
 <p>它的本质还是我们上面提到的embedding，为什么它能解决稀疏矩阵的计算问题呢？<br>因为它的计算并不依赖于xi,xj这种特征组合是否出现，vi的本质是一个embedding, 于某个特征xi而言，只要有足够多xi和其它任何特征一起出现的样本，那么vi就是可以被训练出来的。此时和同样被训练出来的vj计算內积，便可以得到二者组合特征的权重。如下：</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-illustrate.jpg" class="" title="fm图解">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/fm-illustrate.jpg" srcset="/img/loading.gif" class="" title="fm图解">
 <p>这就是embedding的核心特点，将one-hot或者1-0的硬匹配，转换成了向量间的软匹配，从而能够近似的得到2个本来匹配不上的特征的关系。</p>
 <p><strong>公式化简</strong><br>上诉FM公式中的xixj交叉项是可以化简的，从而更好的进行model serving。</p>
 <p>首先，我们要考虑的交叉项肯定不包括自己与自己组合，所以xixi这种情况不考虑，其次xixj,xjxi这种重复的，我们也只算一次。那么原始可以化简如下:</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/FM-briefy.png" class="" title="fm化简">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/FM-briefy.png" srcset="/img/loading.gif" class="" title="fm化简">
 <ol>
 <li>第一步式子中的1/2就是在去重，而减去的项则是自身与自身进行的特征组合。</li>
 <li>第二步则是将向量內积展开，k是向量v的维度。</li>
@@ -383,9 +334,9 @@
 <p>再根据实际情况是分类还是回归选择合适的损失函数进行求导即可，因为我们的式子里有常数项、一阶项和二阶交叉项，所以导数也是3个哦~</p>
 <h3 id="使用DNN"><a href="#使用DNN" class="headerlink" title="使用DNN"></a>使用DNN</h3><p>深度学习在图像和NLP领域都搞得热火朝天如火如荼，那推荐系统可以蹭一蹭吗？答案是可以的，比起上诉的LR,GBDT,FM，神经网络模型最大的优点就是它可以完全自动地对特征进行非线性的组合，且覆盖了二阶组合和高阶组合。</p>
 <p>将DNN引入推荐系统，最常用的方法就是wide and deep模型，它来自于google的一篇论文：《Wide &amp; Deep Learning for Recommender Systems》(文末附链接)。</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/wideAndDeep.png" class="" title="wideAndDeep模型">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/wideAndDeep.png" srcset="/img/loading.gif" class="" title="wideAndDeep模型">
 <p>左边的wide部分是一个LR或者FM模型，而右边的deep则是一个神经网络模型，或者说MLP模型。w&amp;d模型的输出是将wide侧输出与deep侧最后一个隐层的输出相加，然后再进行激活得到的。这样做的目的是可以在一次反向传播中同时更新两边的参数，达到联合训练的目的。</p>
-<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/w&d-formula.png" class="" title="w&amp;d激活">
+<img src="/2020/05/01/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F%E6%8A%80%E6%9C%AF%E6%A6%82%E8%A7%88/w&d-formula.png" srcset="/img/loading.gif" class="" title="w&amp;d激活">
 <p>x_cross是组合特征。<br>Loss目标函数则根据项目的实际情况自行定义，定义好后，再利用神经网络的反向传播进行求解即可。</p>
 <p>当然，DNN也有其缺点。而且成也萧何败萧何，上面我们说自动组合特征是DNN的优点，但也是缺点。这种最纯粹的w&amp;d模型，只依靠MLP本身来自动对特征进行组合，但其内里却完全是一个黑盒子，我们并不知道真正组合了什么。</p>
 <p>一般来说在实际进行使用的时候，这些排序模型在大规模数据上得到的效果是 w&amp;d&gt;LR+GBDT&gt;GBDT&gt;LR的。<br>当然，实际情况实际讨论，在模型落地的时候我们都会进行一些符合业务逻辑的修改，或者加入一些其它的想法。所以，选择合适的才是最重要的。</p>
@@ -396,199 +347,291 @@
 <p>这些行为和反馈一部分可以实时的用来更新在线推荐模型，让用户的实时行为在下一次刷新中即可得到体现。<br>而所有这些数据都应该被记录下来补充进我们的离线训练数据，从而用更大的模型进行离线训练，从而周期性地对模型进行更新。</p>
 <h2 id="reference"><a href="#reference" class="headerlink" title="reference"></a>reference</h2><p><a href="https://www.coursera.org/learn/machine-learning" target="_blank" rel="noopener">Andrew Ng在coursera上的机器学习课程</a><br><a href="https://arxiv.org/abs/1301.3781v3" target="_blank" rel="noopener">word2vec论文:Efficient Estimation of Word Representations in Vector Space</a><br><a href="https://arxiv.org/abs/1603.04259" target="_blank" rel="noopener">item2vec论文:Item2Vec: Neural Item Embedding for Collaborative Filtering</a><br><a href="https://zhuanlan.zhihu.com/p/58160982" target="_blank" rel="noopener">知乎张俊林专栏：全能的FM模型</a><br><a href="https://quinonero.net/Publications/predicting-clicks-facebook.pdf" target="_blank" rel="noopener">gbdt&amp;lr论文：Practical Lessons from Predicting Clicks on Ads at Facebook</a><br><a href="https://arxiv.org/abs/1606.07792" target="_blank" rel="noopener">wide and deep论文:Wide &amp; Deep Learning for Recommender Systems</a></p>
 
-    </div>
+            </article>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95/">基础算法</a>
+                    
+                  </div>
+                
+                
+                  <div class="post-meta">
+                    <i class="iconfont icon-tags"></i>
+                    
+                      <a class="hover-with-bg" href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/">机器学习</a>
+                    
+                      <a class="hover-with-bg" href="/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/">推荐系统</a>
+                    
+                  </div>
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext row">
+                  <div class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/05/15/PyTorch%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%A4%84%E7%90%86/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">PyTorch中的数据加载和处理</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </div>
+                  <div class="post-next col-6">
+                    
+                    
+                      <a href="/2020/04/21/%E7%AE%80%E5%8D%95%E7%9A%84%E8%A7%A6%E5%8F%91%E8%AF%8D%E8%AF%86%E5%88%AB/">
+                        <span class="hidden-mobile">简单的触发词识别</span>
+                        <span class="visible-mobile">下一篇</span>
+                        <i class="iconfont icon-arrowright"></i>
+                      </a>
+                    
+                  </div>
+                </div>
+              
+            </div>
 
-    
-    
-    
+            
+              <!-- Comments -->
+              <div class="comments" id="comments">
+                
+                
+  <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'https://toulondu.github.io/2020/05/01/推荐系统技术概览/';
+        this.page.identifier = '/2020/05/01/推荐系统技术概览/';
+      };
+      var oldLoadDq = window.onload;
+      window.onload = function () {
+        oldLoadDq && oldLoadDq();
 
-      <footer class="post-footer">
-          <div class="post-tags">
-              <a href="/tags/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/" rel="tag"># 机器学习</a>
-              <a href="/tags/%E6%8E%A8%E8%8D%90%E7%B3%BB%E7%BB%9F/" rel="tag"># 推荐系统</a>
-          </div>
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item">
-    <a href="/2020/04/21/%E7%AE%80%E5%8D%95%E7%9A%84%E8%A7%A6%E5%8F%91%E8%AF%8D%E8%AF%86%E5%88%AB/" rel="prev" title="简单的触发词识别">
-      <i class="fa fa-chevron-left"></i> 简单的触发词识别
-    </a></div>
-      <div class="post-nav-item">
-    <a href="/2020/05/15/PyTorch%E4%B8%AD%E7%9A%84%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD%E5%92%8C%E5%A4%84%E7%90%86/" rel="next" title="PyTorch中的数据加载和处理">
-      PyTorch中的数据加载和处理 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
+        var d = document, s = d.createElement('script');
+        s.type = 'text/javascript';
+        s.src = '//' + 'Toulon' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" target="_blank" rel="nofollow noopener noopener">comments
+        powered by Disqus.</a></noscript>
   </div>
 
 
+              </div>
+            
           </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#引子"><span class="nav-number">1.</span> <span class="nav-text">引子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#召回算法"><span class="nav-number">3.</span> <span class="nav-text">召回算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#CF-协同过滤"><span class="nav-number">3.1.</span> <span class="nav-text">CF(协同过滤)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#personal-rank"><span class="nav-number">3.2.</span> <span class="nav-text">personal rank</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#item2vec"><span class="nav-number">3.3.</span> <span class="nav-text">item2vec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基于内容"><span class="nav-number">3.4.</span> <span class="nav-text">基于内容</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#排序算法"><span class="nav-number">4.</span> <span class="nav-text">排序算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#逻辑回归"><span class="nav-number">4.1.</span> <span class="nav-text">逻辑回归</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GBDT"><span class="nav-number">4.2.</span> <span class="nav-text">GBDT</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GBDT-LR"><span class="nav-number">4.3.</span> <span class="nav-text">GBDT + LR</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#FM-factor-machine"><span class="nav-number">4.4.</span> <span class="nav-text">FM(factor machine)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用DNN"><span class="nav-number">4.5.</span> <span class="nav-text">使用DNN</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reference"><span class="nav-number">6.</span> <span class="nav-text">reference</span></a></li></ol></div>
       </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Toulon Du</p>
-  <div class="site-description" itemprop="description">Sharing Knowledge And Learn More</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">12</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">分类</span>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">12</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-
-
-
-      </div>
-
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Toulon Du</span>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div id="tocbot"></div>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
-  </div>
-
-        
-
-
-
-
-
-
-
 
       </div>
-    </footer>
+    
   </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
   
 
   
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
+
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
+      }
+    });
+  </script>
+
+
+
+
+
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
+
+
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "推荐系统技术概览&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>

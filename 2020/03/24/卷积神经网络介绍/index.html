@@ -1,242 +1,200 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
+
+
+
+
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
-<meta name="theme-color" content="#222">
-<meta name="generator" content="Hexo 4.2.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
-  <link rel="mask-icon" href="/images/logo.svg" color="#222">
-
-<link rel="stylesheet" href="/css/main.css">
-
-
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
-
-<script id="hexo-configurations">
-    var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"toulondu.github.io","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
-  </script>
-
-  <meta name="description" content="概述传统的神经网络的全连接层(full connected)在遭遇较大的输入数据时，需要训练的参数将会非常多。举个例子，一张1000×1000的图片，作flatten处理后就有了1000×1000×3的输入维度，如果第二层的隐藏单元数是1000，参数W的维度就是3000000×1000。参数过多，就意味着训练难度变高。在这种情况下，卷积神经网络就诞生了。 什么是卷积我们先来看一下最基础的一点：什么">
-<meta property="og:type" content="article">
-<meta property="og:title" content="卷积神经网络介绍">
-<meta property="og:url" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/index.html">
-<meta property="og:site_name" content="Toulon&#39;s BLOG">
-<meta property="og:description" content="概述传统的神经网络的全连接层(full connected)在遭遇较大的输入数据时，需要训练的参数将会非常多。举个例子，一张1000×1000的图片，作flatten处理后就有了1000×1000×3的输入维度，如果第二层的隐藏单元数是1000，参数W的维度就是3000000×1000。参数过多，就意味着训练难度变高。在这种情况下，卷积神经网络就诞生了。 什么是卷积我们先来看一下最基础的一点：什么">
-<meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv01.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv02.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv03.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding01.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding02.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride01.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride03.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/strideFormula.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D01.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D02.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D03.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D04.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aLayerInConvNet.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/notaionInConvNet.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aBriefConvNet.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/maxPooling.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/avgPooling.png">
-<meta property="og:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/whyCcnvWork.png">
-<meta property="article:published_time" content="2020-03-24T07:07:43.000Z">
-<meta property="article:modified_time" content="2020-03-26T13:22:36.477Z">
-<meta property="article:author" content="Toulon Du">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv01.png">
-
-<link rel="canonical" href="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/">
-
-
-<script id="page-configurations">
-  // https://hexo.io/docs/variables.html
-  CONFIG.page = {
-    sidebar: "",
-    isHome : false,
-    isPost : true,
-    lang   : 'zh-CN'
-  };
-</script>
-
-  <title>卷积神经网络介绍 | Toulon's BLOG</title>
+  <link rel="apple-touch-icon" sizes="76x76" href="/img/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
   
+  <meta name="theme-color" content="#2f4154">
+  <meta name="description" content="Sharing Knowledge And Learn More">
+  <meta name="author" content="Toulon Du">
+  <meta name="keywords" content="">
+  <title>卷积神经网络介绍 - Toulon&#39;s BLOG</title>
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/css/bootstrap.min.css" />
+<link  rel="stylesheet" href="https://cdn.staticfile.org/github-markdown-css/4.0.0/github-markdown.min.css" />
+
+
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/highlight.js/10.0.0/styles/github-gist.min.css" />
+
+
+<!-- 主题依赖的图标库，不要自行修改 -->
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1749284_fmb4a04yx8h.css">
+
+
+
+<link rel="stylesheet" href="//at.alicdn.com/t/font_1736178_pjno9b9zyxs.css">
 
 
 
 
+<link  rel="stylesheet" href="/css/main.css" />
+
+<!-- 自定义样式保持在最底部 -->
 
 
-  <noscript>
-  <style>
-  .use-motion .brand,
-  .use-motion .menu-item,
-  .sidebar-inner,
-  .use-motion .post-block,
-  .use-motion .pagination,
-  .use-motion .comments,
-  .use-motion .post-header,
-  .use-motion .post-body,
-  .use-motion .collection-header { opacity: initial; }
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-  .use-motion .site-title,
-  .use-motion .site-subtitle {
-    opacity: initial;
-    top: initial;
-  }
 
-  .use-motion .logo-line-before i { left: initial; }
-  .use-motion .logo-line-after i { right: initial; }
-  </style>
-</noscript>
+<body>
+  <header style="height: 70vh;">
+    <nav id="navbar" class="navbar fixed-top  navbar-expand-lg navbar-dark scrolling-navbar">
+  <div class="container">
+    <a class="navbar-brand"
+       href="/">&nbsp;<strong>Toulon's Secret</strong>&nbsp;</a>
 
-</head>
+    <button id="navbar-toggler-btn" class="navbar-toggler" type="button" data-toggle="collapse"
+            data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <div class="animated-icon"><span></span><span></span><span></span></div>
+    </button>
 
-<body itemscope itemtype="http://schema.org/WebPage">
-  <div class="container use-motion">
-    <div class="headband"></div>
-
-    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-container">
-  <div class="site-nav-toggle">
-    <div class="toggle" aria-label="切换导航栏">
-      <span class="toggle-line toggle-line-first"></span>
-      <span class="toggle-line toggle-line-middle"></span>
-      <span class="toggle-line toggle-line-last"></span>
+    <!-- Collapsible content -->
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav ml-auto text-center">
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/">
+              <i class="iconfont icon-home-fill"></i>
+              首页</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/archives/">
+              <i class="iconfont icon-archive-fill"></i>
+              归档</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/categories/">
+              <i class="iconfont icon-category-fill"></i>
+              目录</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/tags/">
+              <i class="iconfont icon-tags-fill"></i>
+              标签</a>
+          </li>
+        
+          
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" href="/about/">
+              <i class="iconfont icon-user-fill"></i>
+              关于</a>
+          </li>
+        
+        
+          <li class="nav-item" id="search-btn">
+            <a class="nav-link" data-toggle="modal" data-target="#modalSearch">&nbsp;&nbsp;<i
+                class="iconfont icon-search"></i>&nbsp;&nbsp;</a>
+          </li>
+        
+      </ul>
     </div>
   </div>
-
-  <div class="site-meta">
-
-    <a href="/" class="brand" rel="start">
-      <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Toulon's BLOG</h1>
-      <span class="logo-line-after"><i></i></span>
-    </a>
-      <p class="site-subtitle" itemprop="description">Algorithm</p>
-  </div>
-
-  <div class="site-nav-right">
-    <div class="toggle popup-trigger">
-    </div>
-  </div>
-</div>
-
-
-
-
-<nav class="site-nav">
-  <ul id="menu" class="menu">
-        <li class="menu-item menu-item-home">
-
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
-
-  </li>
-        <li class="menu-item menu-item-archives">
-
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
-
-  </li>
-  </ul>
 </nav>
 
+    <div class="view intro-2" id="background" parallax=true
+         style="background: url('/img/default.png') no-repeat center center;
+           background-size: cover;">
+      <div class="full-bg-img">
+        <div class="mask flex-center" style="background-color: rgba(0, 0, 0, 0.3)">
+          <div class="container text-center white-text fadeInUp">
+            <span class="h2" id="subtitle">
+              
+            </span>
 
-
-
-</div>
-    </header>
-
-    
-  <div class="back-to-top">
-    <i class="fa fa-arrow-up"></i>
-    <span>0%</span>
-  </div>
-
-
-    <main class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          
-
-          <div class="content post">
             
+              
+                <div class="mt-3 post-meta">
+                  <i class="iconfont icon-date-fill" aria-hidden="true"></i>
+                  <time datetime="2020-03-24 15:07">
+                    2020年3月24日 下午
+                  </time>
+                </div>
+              
 
-  <div class="posts-expand">
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/">
+              <div class="mt-1">
+                
+                  
+                  <span class="post-meta mr-2">
+                    <i class="iconfont icon-chart"></i>
+                    3.2k 字
+                  </span>
+                
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="Toulon Du">
-      <meta itemprop="description" content="Sharing Knowledge And Learn More">
-    </span>
+                
+                  
+                  <span class="post-meta mr-2">
+                      <i class="iconfont icon-clock-fill"></i>
+                    
+                    
+                    33
+                     分钟
+                  </span>
+                
 
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Toulon's BLOG">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          卷积神经网络介绍
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2020-03-24 15:07:43" itemprop="dateCreated datePublished" datetime="2020-03-24T15:07:43+08:00">2020-03-24</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2020-03-26 21:22:36" itemprop="dateModified" datetime="2020-03-26T21:22:36+08:00">2020-03-26</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" itemprop="url" rel="index"><span itemprop="name">深度学习</span></a>
-                </span>
-            </span>
+                
+              </div>
+            
+          </div>
 
           
-
         </div>
-      </header>
+      </div>
+    </div>
+  </header>
 
+  <main>
     
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
       
-        <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>传统的神经网络的全连接层(full connected)在遭遇较大的输入数据时，需要训练的参数将会非常多。举个例子，一张1000×1000的图片，作flatten处理后就有了1000×1000×3的输入维度，如果第二层的隐藏单元数是1000，参数W的维度就是3000000×1000。<br>参数过多，就意味着训练难度变高。在这种情况下，卷积神经网络就诞生了。</p>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="d-none d-lg-block col-lg-2"></div>
+    <div class="col-lg-8 nopadding-md">
+      <div class="container nopadding-md" id="board-ctn">
+        <div class="py-5" id="board">
+          <div class="post-content mx-auto" id="post">
+            
+            <article class="markdown-body">
+              <h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p>传统的神经网络的全连接层(full connected)在遭遇较大的输入数据时，需要训练的参数将会非常多。举个例子，一张1000×1000的图片，作flatten处理后就有了1000×1000×3的输入维度，如果第二层的隐藏单元数是1000，参数W的维度就是3000000×1000。<br>参数过多，就意味着训练难度变高。在这种情况下，卷积神经网络就诞生了。</p>
 <h2 id="什么是卷积"><a href="#什么是卷积" class="headerlink" title="什么是卷积"></a>什么是卷积</h2><p>我们先来看一下最基础的一点：什么是卷积？</p>
 <p>用一个例子来进行说明，假如我们有一张6×6的图片，为了方便理解，我们暂时假定它第三个维度为1，即通道数为1。那么一次卷积操作如下：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv01.png" class="" title="卷积1">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv01.png" srcset="/img/loading.gif" class="" title="卷积1">
 
 <p>如上图所示，左一的6×6矩阵代表我们的输入矩阵，中间的3×3矩阵叫做过滤器(filter)，也叫做卷积核，而二者中间的”*“就表示<strong><em>卷积</em></strong>，它和计算机中的乘法符号一致。</p>
 <p>卷积的运算方法就是 从输入矩阵的左上角开始，从左到右每一次取出一个与卷积核维度一样大小的矩阵，这里是3×3。 将取出的矩阵的每一位与卷积核对应为相乘并相加，得到的数据填在右侧结果矩阵的对应位置。</p>
 <p>第二步如下：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv02.png" class="" title="卷积2">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv02.png" srcset="/img/loading.gif" class="" title="卷积2">
 
 <p>以此类推，往右不能再走时，就向下移动一行，再次从最左边开始取。<br>这样，最终我们可以得到一个4×4的结果矩阵(一张变小的图片)。</p>
 <h3 id="卷积在做什么"><a href="#卷积在做什么" class="headerlink" title="卷积在做什么"></a>卷积在做什么</h3><p>你可能会感到困惑，这样的一步所谓的操作到底做了些什么。<br>就我们上面的例子来说，这样一个卷积核的效果可以用六个字来概括：“垂直边缘检测”。<br>如下：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv03.png" class="" title="卷积3">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/conv03.png" srcset="/img/loading.gif" class="" title="卷积3">
 <p>可以看到，结果图片的中部有一道明显的白色，这就是检测出来的垂直边缘。是的，它看起来与左边的输入图片有些不符合，显得比较厚，这是因为我们选择的图片较小(才6×6)，当把图片变大时，结果就变得较为可观了。</p>
 <p>既然有垂直边缘检测的卷积核，自然就有其它功能的卷积核，比如水平边缘检测卷积核，比如着重突出某些边缘特征的卷积核等。</p>
 <p>而卷积核的值是可以通过训练得到的，这点我们将在后面介绍。</p>
@@ -245,59 +203,59 @@
 <p>首先，关于卷积操作减小维度，是有一个通用的计算公式的：<br><strong><em>结果矩阵的维度 = (n-f+1) × (n-f+1)</em></strong><br>其中f为卷积核的维度，n为输入矩阵的维度。</p>
 <p>除了会减小图片的维度外，卷积还会导致图片角落的像素只能被使用到一次，而中间的数据则会被使用多次，这样会导致图片边缘的数据不能得到足够的利用，甚至被丢失了。</p>
 <p>所以所谓填充，就是填充数据的边缘：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding01.png" class="" title="填充1">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding01.png" srcset="/img/loading.gif" class="" title="填充1">
 <p>通过在原图片边缘填充一层使之变成8×8的图像，从而经过卷积操作后，你依然可以得到一个6×6的图像。</p>
 <p>一般来说，在卷积网络中大多数时候使用这样的填充，即使数据在填充后进行卷积得到与原数据同样维度的数据。这样的卷积操作我们称之为<strong><em>same卷积</em></strong>。</p>
 <p>除此之外还有full卷积和valid卷积，前者让图像最角落的元素也可以被充分利用，而后者则是不做填充。</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding02.png" class="" title="full卷积">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/padding02.png" srcset="/img/loading.gif" class="" title="full卷积">
 <p>上图为full卷积</p>
 <h2 id="步幅-stride-卷积"><a href="#步幅-stride-卷积" class="headerlink" title="步幅(stride)卷积"></a>步幅(stride)卷积</h2><p>在之前的介绍中，我们每次计算卷积后，都是在原图片上向右或者向下移动一步。而步幅卷积，顾名思义，就是将这个一步扩展开来，每次移动s步，我们以2为例：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride01.png" class="" title="步幅卷积1">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride01.png" srcset="/img/loading.gif" class="" title="步幅卷积1">
 
 <p>如上为第一步和第二步，此外，当需要向下移动时，也是移动s步</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride03.png" class="" title="步幅卷积3">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/stride03.png" srcset="/img/loading.gif" class="" title="步幅卷积3">
 
 <p>容易计算，经过步幅为s的卷积后，结果矩阵维度的计算方式为：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/strideFormula.png" class="" title="步幅卷积结果矩阵维度公式">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/strideFormula.png" srcset="/img/loading.gif" class="" title="步幅卷积结果矩阵维度公式">
 
 <p>假如当向右移动s步已经超出了原矩阵范围，即当不能被整除的时候，就直接舍弃剩余部分直接向下走了。即向下取整。</p>
 <h2 id="三维数据的卷积"><a href="#三维数据的卷积" class="headerlink" title="三维数据的卷积"></a>三维数据的卷积</h2><p>对于现实情况中的图片来说，因为RGB格式的存在，我们的输入数据大多都是3维的，那么，如何将卷积扩展到三维数据上去呢？</p>
 <p>首先，卷积核（过滤器）也要变成三维，且第三个维度要和原矩阵相同(第三个维度在卷积中我们一般叫做<strong><em>通道</em></strong>)，如下：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D01.png" class="" title="三维数据卷积01">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D01.png" srcset="/img/loading.gif" class="" title="三维数据卷积01">
 <p>可以看到，最终的结果是一个4*4的矩阵，没有了第三个维度，计算方法其实很简单，基本就是二维计算方式的三维扩展：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D02.png" class="" title="三维数据卷积02">
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D03.png" class="" title="三维数据卷积03">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D02.png" srcset="/img/loading.gif" class="" title="三维数据卷积02">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D03.png" srcset="/img/loading.gif" class="" title="三维数据卷积03">
 <p>即把每个3×3×3 = 27个格子的数字对应相乘并相加，然后右移和下移即可，因为深度一致，并不需要关心第三个维度。</p>
 <p>卷积核的设计很灵活，假如你把卷积核的第二层和第三层都设置为0，相当于在结果矩阵中就只有你对第一层的卷积，在RGB图片中，你就只检测了红色通道的边缘。</p>
 <p>更常用的是，你可以同时使用多个卷积核，然后把得到的结果堆叠，得到通道数大于1的结果：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D04.png" class="" title="三维数据卷积04">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/convIn3D04.png" srcset="/img/loading.gif" class="" title="三维数据卷积04">
 <p><strong>所以卷积结果矩阵的通道数，取决于卷积核的数量，记住这一点。</strong></p>
 <h2 id="卷积神经网络"><a href="#卷积神经网络" class="headerlink" title="卷积神经网络"></a>卷积神经网络</h2><p>介绍了这么多，我们拉通来看一下，把上述知识点结合起来，就是卷积神经网络的一层：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aLayerInConvNet.png" class="" title="卷及网络中的一层">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aLayerInConvNet.png" srcset="/img/loading.gif" class="" title="卷及网络中的一层">
 <p>之前我们说过，每一个过滤器(卷积核)都相当于是过滤出原数据的一个特性。上图中，用了2个过滤器，将每个过滤器得到的结果再进行一次激活。激活函数可以说是神经网络中的一种重要工具，一般是一个非线性函数，可以简单地理解为将数据中的特点放大并且保证了多层网络的实用性。激活之后再重叠在一起，就得到了我们最后4×4×2的结果。</p>
 <p>如果你知道普通神经网络的结构，它每一层的运算就是先进行 z[l] = W*a[l-1] + b[l]，再进行 a[l] = g(z[l])。可以看到对于我们的卷积神经网络，这一层的操作，也可以对应成这个公式，过滤器就是我们的W。</p>
 <p>既然过滤器是我们W，上面我们也说过过滤器的值可以训练，那么这么一层卷积网络，我们需要训练多少参数呢？<br>假设我们有10个3×3×3的过滤器，那么我们需要 3×3×3×10 + 10(b参数，偏差值) 个，即280个参数。</p>
 <h3 id="ConvNet中的符号"><a href="#ConvNet中的符号" class="headerlink" title="ConvNet中的符号"></a>ConvNet中的符号</h3><p>在卷积网络中，你会看到很多各种符号以及参数、中间值，结果的维度，我们稍作总结：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/notaionInConvNet.png" class="" title="卷积网络中的符号">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/notaionInConvNet.png" srcset="/img/loading.gif" class="" title="卷积网络中的符号">
 
 <p>以上就是卷积网络中的一层了，那么我们如何扩展它来构建一个卷积网络呢？</p>
 <p>PS: ConvNet是卷积神经网络的简写</p>
 <h3 id="一个简单的例子"><a href="#一个简单的例子" class="headerlink" title="一个简单的例子"></a>一个简单的例子</h3><p>现在假如你有一些照片，你想通过卷积网络来实现图片的分类，假如输入图片的大小为39×39×3：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aBriefConvNet.png" class="" title="一个简单的卷积网络结构">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/aBriefConvNet.png" srcset="/img/loading.gif" class="" title="一个简单的卷积网络结构">
 <p>接着，我们可以把最后这个7×7×40的矩阵展开成1960的向量，接着我们可以使用普通神经网络的手段，使用逻辑回归或者一个softmax层来进行最后结果的计算。</p>
 <p>从上面可以看出一个大多数卷积神经网络的趋势，即随着层数的增加，矩阵的宽高会逐渐减小，而通道数量会逐渐增加。</p>
 <h3 id="其它的层类型"><a href="#其它的层类型" class="headerlink" title="其它的层类型"></a>其它的层类型</h3><p>上面的网络中，这些使用卷积核的层都可以叫做卷积层，但神经网络层中还有一些其他的层类型，比如池化(pooling)层，全连接(full connect/FC)层等。<br>将卷积层与这二者结合，我们可以搭建出更好的卷积神经网络。</p>
 <h2 id="池化层"><a href="#池化层" class="headerlink" title="池化层"></a>池化层</h2><p>在ConvNet中，经常会使用一种叫做池化层(pooling layer)的结构来减小表示层的大小，从而加快模型训练，甚至更好的发现一些特性。</p>
 <p>下面介绍两种池化层</p>
 <h3 id="最大值-Max-池化"><a href="#最大值-Max-池化" class="headerlink" title="最大值(Max)池化"></a>最大值(Max)池化</h3><p>非常简单，如下：</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/maxPooling.png" class="" title="最大值池化">
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/maxPooling.png" srcset="/img/loading.gif" class="" title="最大值池化">
 <p>虽然很简单，但max池化在很多的实际应用中都有很好的效果。为什么呢？<br>直白的理解一下，加入你把这个4×4的区域看作某个特征的集合，即神经网络某个层中的激活状态，那么一个大的数字意味着算法可能检测到了一个特定的特征，如上图左上的2*2区域就有这样的特征，8被挑选并保留下来，它可能是一个垂直边缘，可能是一个任何难以描述的特征，而右上区域没有这样的特征，它的最大值依然很小。<br>所以，max pooling作所做的其实是 ，如果在过滤器中任何地方检测到了任何特征，就保留最大的数值。<br>反之，如果没有明显的特征被检测到，比如右上方的四分之一区域就没有这个特征，在结果中那些数值的最大值仍然相当小。</p>
-<h3 id="平均值池化"><a href="#平均值池化" class="headerlink" title="平均值池化"></a>平均值池化</h3><img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/avgPooling.png" class="" title="平均值池化">
+<h3 id="平均值池化"><a href="#平均值池化" class="headerlink" title="平均值池化"></a>平均值池化</h3><img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/avgPooling.png" srcset="/img/loading.gif" class="" title="平均值池化">
 <p>就不介绍了…</p>
 <h3 id="池化层特点"><a href="#池化层特点" class="headerlink" title="池化层特点"></a>池化层特点</h3><p>最大值池化的使用通常比均值池化多得多。<br>也许你注意到了，大多数池化层都不需要学习超参数，只要确定了f和s，计算就确定了。<br>而且如果输入数据是3维的，则结果中通道数量依然保持，即每一层都像第一层一样进行过滤。</p>
 <h2 id="卷积网络样例"><a href="#卷积网络样例" class="headerlink" title="卷积网络样例"></a>卷积网络样例</h2><p>todo…</p>
 <h2 id="卷积为什么有用"><a href="#卷积为什么有用" class="headerlink" title="卷积为什么有用"></a>卷积为什么有用</h2><p>比起一般的全连接神经网络，卷积神经网络主要有2个优势，参数共享和连接稀疏性。</p>
-<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/whyCcnvWork.png" class="" title="例图"> 
+<img src="/2020/03/24/%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%BB%8B%E7%BB%8D/whyCcnvWork.png" srcset="/img/loading.gif" class="" title="例图"> 
 <p>举个例子，如上图，第一层共32×32×3 = 3072个输入，第二层共4704个输出。使用如上所示的卷积，我们只需要(5×5×3+1)×6一共456个参数。而如果我们使用全连接层，我们需要多少参数呢？一共3072×4704个参数，多太多了。</p>
 <p>卷积网络的参数少，主要是两个原因。</p>
 <h3 id="参数共享"><a href="#参数共享" class="headerlink" title="参数共享"></a>参数共享</h3><p>每一次卷积的时候，我们的卷积核一直被轮流地使用，输入数据的每一个部分都与过滤器进行了计算。<br>所谓共享即卷积核的共享。</p>
@@ -306,192 +264,276 @@
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这就是卷积神经网络的基本概念，通过tensorflow等软件包你也可以很轻松的实现各种自定义的网络类型。但一般的实际应用中，并不推荐自由构建网络结构，因为卷积网络的训练时间普遍较长，所以当你要建立一个卷积网络来解决一个新的问题时，去尝试想当然的网络结构往往得不偿失。一个好的方法就是多从各大论文或者成功模型的分享中获得灵感，在别人推荐的模型和超参数的基础上构建你的网络，才能事半功倍。</p>
 <p>之后会介绍一些经典的卷积网络模型。</p>
 
-    </div>
+            </article>
+            <hr>
+            <div>
+              <div class="post-metas mb-3">
+                
+                  <div class="post-meta mr-3">
+                    <i class="iconfont icon-category"></i>
+                    
+                      <a class="hover-with-bg" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a>
+                    
+                  </div>
+                
+                
+              </div>
+              
+                <p class="note note-warning">本博客所有文章除特别声明外，均采用 <a href="https://zh.wikipedia.org/wiki/Wikipedia:CC_BY-SA_3.0%E5%8D%8F%E8%AE%AE%E6%96%87%E6%9C%AC" target="_blank" rel="nofollow noopener noopener">CC BY-SA 3.0协议</a> 。转载请注明出处！</p>
+              
+              
+                <div class="post-prevnext row">
+                  <div class="post-prev col-6">
+                    
+                    
+                      <a href="/2020/03/25/%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9F/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">实现一个简单的人脸识别系统</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
+                    
+                  </div>
+                  <div class="post-next col-6">
+                    
+                    
+                  </div>
+                </div>
+              
+            </div>
 
-    
-    
-    
+            
+              <!-- Comments -->
+              <div class="comments" id="comments">
+                
+                
+  <div class="disqus" style="width:100%">
+    <div id="disqus_thread"></div>
+    <script type="text/javascript">
+      var disqus_config = function () {
+        this.page.url = 'https://toulondu.github.io/2020/03/24/卷积神经网络介绍/';
+        this.page.identifier = '/2020/03/24/卷积神经网络介绍/';
+      };
+      var oldLoadDq = window.onload;
+      window.onload = function () {
+        oldLoadDq && oldLoadDq();
 
-      <footer class="post-footer">
-
-        
-
-
-        
-    <div class="post-nav">
-      <div class="post-nav-item"></div>
-      <div class="post-nav-item">
-    <a href="/2020/03/25/%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84%E4%BA%BA%E8%84%B8%E8%AF%86%E5%88%AB%E7%B3%BB%E7%BB%9F/" rel="next" title="实现一个简单的人脸识别系统">
-      实现一个简单的人脸识别系统 <i class="fa fa-chevron-right"></i>
-    </a></div>
-    </div>
-      </footer>
-    
-  </article>
-  
-  
-  
-
+        var d = document, s = d.createElement('script');
+        s.type = 'text/javascript';
+        s.src = '//' + 'Toulon' + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+      };
+    </script>
+    <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" target="_blank" rel="nofollow noopener noopener">comments
+        powered by Disqus.</a></noscript>
   </div>
 
 
+              </div>
+            
           </div>
-          
-
-<script>
-  window.addEventListener('tabs:register', () => {
-    let { activeClass } = CONFIG.comments;
-    if (CONFIG.comments.storage) {
-      activeClass = localStorage.getItem('comments_active') || activeClass;
-    }
-    if (activeClass) {
-      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
-      if (activeTab) {
-        activeTab.click();
-      }
-    }
-  });
-  if (CONFIG.comments.storage) {
-    window.addEventListener('tabs:click', event => {
-      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
-      let commentClass = event.target.classList[1];
-      localStorage.setItem('comments_active', commentClass);
-    });
-  }
-</script>
-
         </div>
-          
-  
-  <div class="toggle sidebar-toggle">
-    <span class="toggle-line toggle-line-first"></span>
-    <span class="toggle-line toggle-line-middle"></span>
-    <span class="toggle-line toggle-line-last"></span>
-  </div>
-
-  <aside class="sidebar">
-    <div class="sidebar-inner">
-
-      <ul class="sidebar-nav motion-element">
-        <li class="sidebar-nav-toc">
-          文章目录
-        </li>
-        <li class="sidebar-nav-overview">
-          站点概览
-        </li>
-      </ul>
-
-      <!--noindex-->
-      <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#什么是卷积"><span class="nav-number">2.</span> <span class="nav-text">什么是卷积</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#卷积在做什么"><span class="nav-number">2.1.</span> <span class="nav-text">卷积在做什么</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#填充-padding"><span class="nav-number">3.</span> <span class="nav-text">填充-padding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#步幅-stride-卷积"><span class="nav-number">4.</span> <span class="nav-text">步幅(stride)卷积</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三维数据的卷积"><span class="nav-number">5.</span> <span class="nav-text">三维数据的卷积</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积神经网络"><span class="nav-number">6.</span> <span class="nav-text">卷积神经网络</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ConvNet中的符号"><span class="nav-number">6.1.</span> <span class="nav-text">ConvNet中的符号</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个简单的例子"><span class="nav-number">6.2.</span> <span class="nav-text">一个简单的例子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其它的层类型"><span class="nav-number">6.3.</span> <span class="nav-text">其它的层类型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#池化层"><span class="nav-number">7.</span> <span class="nav-text">池化层</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#最大值-Max-池化"><span class="nav-number">7.1.</span> <span class="nav-text">最大值(Max)池化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#平均值池化"><span class="nav-number">7.2.</span> <span class="nav-text">平均值池化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#池化层特点"><span class="nav-number">7.3.</span> <span class="nav-text">池化层特点</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积网络样例"><span class="nav-number">8.</span> <span class="nav-text">卷积网络样例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#卷积为什么有用"><span class="nav-number">9.</span> <span class="nav-text">卷积为什么有用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#参数共享"><span class="nav-number">9.1.</span> <span class="nav-text">参数共享</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#连接的稀疏性"><span class="nav-number">9.2.</span> <span class="nav-text">连接的稀疏性</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
       </div>
-      <!--/noindex-->
-
-      <div class="site-overview-wrap sidebar-panel">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-  <p class="site-author-name" itemprop="name">Toulon Du</p>
-  <div class="site-description" itemprop="description">Sharing Knowledge And Learn More</div>
-</div>
-<div class="site-state-wrap motion-element">
-  <nav class="site-state">
-      <div class="site-state-item site-state-posts">
-          <a href="/archives/">
-        
-          <span class="site-state-item-count">12</span>
-          <span class="site-state-item-name">日志</span>
-        </a>
-      </div>
-      <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">6</span>
-        <span class="site-state-item-name">分类</span>
-      </div>
-      <div class="site-state-item site-state-tags">
-        <span class="site-state-item-count">12</span>
-        <span class="site-state-item-name">标签</span>
-      </div>
-  </nav>
-</div>
-
-
-
-      </div>
-
     </div>
-  </aside>
-  <div id="sidebar-dimmer"></div>
-
-
-      </div>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-inner">
-        
-
-        
-
-<div class="copyright">
-  
-  &copy; 
-  <span itemprop="copyrightYear">2020</span>
-  <span class="with-love">
-    <i class="fa fa-user"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">Toulon Du</span>
+    
+      <div class="d-none d-lg-block col-lg-2 toc-container" id="toc-ctn">
+        <div id="toc">
+  <p class="toc-header"><i class="iconfont icon-list"></i>&nbsp;目录</p>
+  <div id="tocbot"></div>
 </div>
-  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
-  </div>
-
-        
-
-
-
-
-
-
-
 
       </div>
-    </footer>
+    
   </div>
+</div>
+
+<!-- Custom -->
+
+
+    
+  </main>
 
   
-  <script src="/lib/anime.min.js"></script>
-  <script src="/lib/velocity/velocity.min.js"></script>
-  <script src="/lib/velocity/velocity.ui.min.js"></script>
-
-<script src="/js/utils.js"></script>
-
-<script src="/js/motion.js"></script>
-
-
-<script src="/js/schemes/muse.js"></script>
-
-
-<script src="/js/next-boot.js"></script>
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    <a id="scroll-top-button" href="#" role="button">
+      <i class="iconfont icon-arrowup" aria-hidden="true"></i>
+    </a>
   
 
   
+    <div class="modal fade" id="modalSearch" tabindex="-1" role="dialog" aria-labelledby="ModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header text-center">
+        <h4 class="modal-title w-100 font-weight-bold">搜索</h4>
+        <button type="button" id="local-search-close" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body mx-3">
+        <div class="md-form mb-5">
+          <input type="text" id="local-search-input" class="form-control validate">
+          <label data-error="x" data-success="v"
+                 for="local-search-input">关键词</label>
+        </div>
+        <div class="list-group" id="local-search-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+  
+
+  
+
+  
+
+  <footer class="mt-5">
+  <div class="text-center py-3">
+    <div>
+      <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+      <i class="iconfont icon-love"></i>
+      <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener">
+        <span>Fluid</span></a>
+    </div>
+    
+
+    
+
+    
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script  src="https://cdn.staticfile.org/jquery/3.4.1/jquery.min.js" ></script>
+<script  src="https://cdn.staticfile.org/twitter-bootstrap/4.4.1/js/bootstrap.min.js" ></script>
+<script  src="/js/main.js" ></script>
+
+
+  <script  src="/js/lazyload.js" ></script>
+
+
+
+  
+  <script  src="https://cdn.staticfile.org/tocbot/4.11.1/tocbot.min.js" ></script>
+  <script>
+    $(document).ready(function () {
+      var boardCtn = $('#board-ctn');
+      var boardTop = boardCtn.offset().top;
+
+      tocbot.init({
+        tocSelector: '#tocbot',
+        contentSelector: '.post-content',
+        headingSelector: 'h1,h2,h3,h4,h5,h6',
+        linkClass: 'tocbot-link',
+        activeLinkClass: 'tocbot-active-link',
+        listClass: 'tocbot-list',
+        isCollapsedClass: 'tocbot-is-collapsed',
+        collapsibleClass: 'tocbot-is-collapsible',
+        collapseDepth: 0,
+        scrollSmooth: true,
+        headingsOffset: -boardTop
+      });
+      if ($('.toc-list-item').length > 0) {
+        $('#toc').css('visibility', 'visible');
+      }
+    });
+  </script>
+
+
+
+
+
+  <script defer src="https://cdn.staticfile.org/clipboard.js/2.0.6/clipboard.min.js" ></script>
+  <script  src="/js/clipboard-use.js" ></script>
+
+
+
+
+
+
+<!-- Plugins -->
+
+
+
+  <script  src="https://cdn.staticfile.org/typed.js/2.0.11/typed.min.js" ></script>
+  <script>
+    var typed = new Typed('#subtitle', {
+      strings: [
+        '  ',
+        "卷积神经网络介绍&nbsp;",
+      ],
+      cursorChar: "_",
+      typeSpeed: 70,
+      loop: false,
+    });
+    typed.stop();
+    $(document).ready(function () {
+      $(".typed-cursor").addClass("h2");
+      typed.start();
+    });
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/anchor-js/4.2.2/anchor.min.js" ></script>
+  <script>
+    anchors.options = {
+      placement: "right",
+      visible: "hover",
+      
+    };
+    var el = "h1,h2,h3,h4,h5,h6".split(",");
+    var res = [];
+    for (item of el) {
+      res.push(".markdown-body > " + item)
+    }
+    anchors.add(res.join(", "))
+  </script>
+
+
+
+  <script  src="/js/local-search.js" ></script>
+  <script>
+    var path = "/local-search.xml";
+    var inputArea = document.querySelector("#local-search-input");
+    inputArea.onclick = function () {
+      searchFunc(path, 'local-search-input', 'local-search-result');
+      this.onclick = null
+    }
+  </script>
+
+
+
+  <script  src="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.js" ></script>
+  <link  rel="stylesheet" href="https://cdn.staticfile.org/fancybox/3.5.7/jquery.fancybox.min.css" />
+
+  <script>
+    $('#post img:not(.no-zoom img, img[no-zoom]), img[zoom]').each(
+      function () {
+        var element = document.createElement('a');
+        $(element).attr('data-fancybox', 'images');
+        $(element).attr('href', $(this).attr('src'));
+        $(this).wrap(element);
+      }
+    );
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </body>
 </html>
