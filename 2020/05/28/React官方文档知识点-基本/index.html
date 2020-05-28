@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"toulondu.github.io","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近准备面试前端工作，很多很久没使用的东西是应该复习一下了。首当其冲就是前端领域的三大框架。在这里就不再比较这三个框架的优劣，我从15年底开始用react，也算是很早期的一批用户了，所以先从官方文档出发复习一下React的知识点，顺便也学习一下新的特性。 官方文档比较多，我全部看了一遍。也将其中的要点摘录来下来，如果有缘读到这篇文章的你恰巧没有那么多时间复习，可以大概地瞟一眼我的摘录笔记。大概会有">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React官方文档知识点-基本">
+<meta property="og:url" content="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E5%9F%BA%E6%9C%AC/index.html">
+<meta property="og:site_name" content="Toulon&#39;s BLOG">
+<meta property="og:description" content="最近准备面试前端工作，很多很久没使用的东西是应该复习一下了。首当其冲就是前端领域的三大框架。在这里就不再比较这三个框架的优劣，我从15年底开始用react，也算是很早期的一批用户了，所以先从官方文档出发复习一下React的知识点，顺便也学习一下新的特性。 官方文档比较多，我全部看了一遍。也将其中的要点摘录来下来，如果有缘读到这篇文章的你恰巧没有那么多时间复习，可以大概地瞟一眼我的摘录笔记。大概会有">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-28T09:56:23.000Z">
+<meta property="article:modified_time" content="2020-05-28T10:03:39.891Z">
+<meta property="article:author" content="Toulon Du">
+<meta property="article:tag" content="React">
+<meta property="article:tag" content="基础">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E5%9F%BA%E6%9C%AC/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>React官方文档知识点-基本 | Toulon's BLOG</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Toulon's BLOG</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Algorithm</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E5%9F%BA%E6%9C%AC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Toulon Du">
+      <meta itemprop="description" content="Sharing Knowledge And Learn More">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Toulon's BLOG">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          React官方文档知识点-基本
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-28 17:56:23 / 修改时间：18:03:39" itemprop="dateCreated datePublished" datetime="2020-05-28T17:56:23+08:00">2020-05-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">web前端</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近准备面试前端工作，很多很久没使用的东西是应该复习一下了。首当其冲就是前端领域的三大框架。在这里就不再比较这三个框架的优劣，我从15年底开始用react，也算是很早期的一批用户了，所以先从官方文档出发复习一下React的知识点，顺便也学习一下新的特性。</p>
+<p>官方文档比较多，我全部看了一遍。也将其中的要点摘录来下来，如果有缘读到这篇文章的你恰巧没有那么多时间复习，可以大概地瞟一眼我的摘录笔记。大概会有三篇，基本、进阶和Context+Hook</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h3 id="1-React不直接修改数据的原因："><a href="#1-React不直接修改数据的原因：" class="headerlink" title="1.React不直接修改数据的原因："></a>1.React不直接修改数据的原因：</h3><ul>
+<li>简化复杂的功能，不直接在数据上修改可以让我们追溯并复用游戏的历史记录。</li>
+<li>跟踪数据的改变，直接修改数据，很难跟踪到数据的改变，需要可变对象可以与改变之前的版本进行对比，这样整个对象树都需要被遍历一次。<br>跟踪不可变数据的变化相对来说就容易多了。如果发现对象变成了一个新对象，那么我们就可以说对象发生改变了。</li>
+<li>确定在react中何时重新渲染，不可变性最主要的优势在于它可以帮助我们在 React 中创建 pure components。我们可以很轻松的确定不可变数据是否发生了改变，从而确定何时对组件进行重新渲染。</li>
+</ul>
+<h3 id="2-函数组件"><a href="#2-函数组件" class="headerlink" title="2.函数组件"></a>2.函数组件</h3><p>如果你想写的组件只包含一个 render 方法，并且不包含 state，那么使用函数组件就会更简单。<br>PS：当我们把 Square 修改成函数组件时，我们同时也把 onClick={() =&gt; this.props.onClick()} 改成了更短的 onClick={props.onClick}（注意两侧都没有括号）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">function Square(props) &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;button className&#x3D;&quot;square&quot; onClick&#x3D;&#123;props.onClick&#125;&gt;</span><br><span class="line">      &#123;props.value&#125;</span><br><span class="line">    &lt;&#x2F;button&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-key"><a href="#3-key" class="headerlink" title="3.key"></a>3.key</h3><p>我们需要给每一个列表项一个确定的 key 属性，它可以用来区分不同的列表项和他们的同级兄弟列表项。<br>每当一个列表重新渲染时，React 会根据每一项列表元素的 key 来检索上一次渲染时与每个 key 所匹配的列表项。如果 React 发现当前的列表有一个之前不存在的 key，那么就会创建出一个新的组件。如果 React 发现和之前对比少了一个 key，那么就会销毁之前对应的组件。如果一个组件的 key 发生了变化，这个组件会被销毁，然后使用新的 state 重新创建一份。</p>
+<p>key 是 React 中一个特殊的保留属性（还有一个是 ref，拥有更高级的特性）。当 React 元素被创建出来的时候，React 会提取出 key 属性，然后把 key 直接存储在返回的元素上。虽然 key 看起来好像是 props 中的一个，但是你不能通过 this.props.key 来获取 key。React 会通过 key 来自动判断哪些组件需要更新。组件是不能访问到它的 key 的。</p>
+<p>我们强烈推荐，每次只要你构建动态列表的时候，都要指定一个合适的 key。如果你没有找到一个合适的 key，那么你就需要考虑重新整理你的数据结构了，这样才能有合适的 key。</p>
+<p>另外，设置key的元素是map() 方法中的元素，假如你的每个li都是包含在一个ListItem组件中返回的，你就应该在ListItem上加key，而不是li</p>
+<h3 id="4-防注入攻击"><a href="#4-防注入攻击" class="headerlink" title="4.防注入攻击"></a>4.防注入攻击</h3><p>React DOM 在渲染所有输入内容之前，默认会进行转义。它可以确保在你的应用中，永远不会注入那些并非自己明确编写的内容。所有的内容在渲染之前都被转换成了字符串。这样可以有效地防止 XSS（cross-site-scripting, 跨站脚本）攻击。</p>
+<h3 id="5-将一个元素渲染为dom"><a href="#5-将一个元素渲染为dom" class="headerlink" title="5.将一个元素渲染为dom"></a>5.将一个元素渲染为dom</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;div id&#x3D;&quot;root&quot;&gt;&lt;&#x2F;div&gt;</span><br></pre></td></tr></table></figure>
+<p>成为‘根’dom节点，仅使用react创建的应用通常只有一个根dom节点。<br>想要将一个 React 元素渲染到根 DOM 节点中，只需把它们一起传入 ReactDOM.render()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">const element &#x3D; &lt;h1&gt;Hello, world&lt;&#x2F;h1&gt;;</span><br><span class="line">ReactDOM.render(element, document.getElementById(&#39;root&#39;));</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-按需更新"><a href="#6-按需更新" class="headerlink" title="6.按需更新"></a>6.按需更新</h3><p>React DOM 会将元素和它的子元素与它们之前的状态进行比较，并只会进行必要的更新来使 DOM 达到预期的状态。<br>尽管每一秒我们都会新建一个描述整个 UI 树的元素，React DOM 只会更新实际改变了的内容<br>根据我们的经验，考虑 UI 在任意给定时刻的状态，而不是随时间变化的过程，能够消灭一整类的 bug。</p>
+<h3 id="7-组件名称必须以大写字母开头。"><a href="#7-组件名称必须以大写字母开头。" class="headerlink" title="7.组件名称必须以大写字母开头。"></a>7.组件名称必须以大写字母开头。</h3><p>React 会将以小写字母开头的组件视为原生 DOM 标签。例如，<code>&lt;div /&gt;</code>代表 HTML 的 div 标签，而 <code>&lt;Welcome /&gt;</code> 则代表一个组件，并且需在作用域内使用 Welcome。</p>
+<h3 id="8-生命周期"><a href="#8-生命周期" class="headerlink" title="8.生命周期"></a>8.生命周期</h3><p>当 Clock 组件第一次被渲染到 DOM 中的时候，就为其设置一个计时器。这在 React 中被称为“挂载（mount）”。</p>
+<p>同时，当 DOM 中 Clock 组件被删除的时候，应该清除计时器。这在 React 中被称为“卸载（unmount）”。</p>
+<p>于是我们有了componentDidMount() 和 componentWillUnmount()</p>
+<p>当你需要在class中添加不参与数据流的额外字段，而它又需要初始化时，就在componentDidMount()来做。<br>比如在componentDidMount()中初始化一个计时器，在componentWillUnmount()中销毁它。</p>
+<p>关于state:</p>
+<ul>
+<li>不要直接修改</li>
+<li>state的更新可能是异步的，出于性能考虑，React 可能会把多个 setState() 调用合并成一个调用。<br>因为 this.props 和 this.state 可能会异步更新，所以你不要依赖他们的值来更新下一个状态。<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Wrong</span><br><span class="line">this.setState(&#123;</span><br><span class="line">  counter: this.state.counter + this.props.increment,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+要解决这个问题，可以让 setState() 接收一个函数而不是一个对象。这个函数用上一个 state 作为第一个参数，将此次更新被应用时的 props 做为第二个参数：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Correct</span><br><span class="line">this.setState((state, props) &#x3D;&gt; (&#123;</span><br><span class="line">  counter: state.counter + props.increment</span><br><span class="line">&#125;));</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="9-事件"><a href="#9-事件" class="headerlink" title="9.事件"></a>9.事件</h3><p>在 React 中另一个不同点是你不能通过返回 false 的方式阻止默认行为。你必须显式的使用 preventDefault 。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">function ActionLink() &#123;</span><br><span class="line">  function handleClick(e) &#123;</span><br><span class="line">    e.preventDefault();</span><br><span class="line">    console.log(&#39;The link was clicked.&#39;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  return (</span><br><span class="line">    &lt;a href&#x3D;&quot;#&quot; onClick&#x3D;&#123;handleClick&#125;&gt;</span><br><span class="line">      Click me</span><br><span class="line">    &lt;&#x2F;a&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里，e 是一个合成事件。React 根据 W3C 规范来定义这些合成事件，所以你不需要担心跨浏览器的兼容性问题。如果想了解更多，请查看 <a href="https://zh-hans.reactjs.org/docs/events.html" target="_blank" rel="noopener">SyntheticEvent</a> 参考指南。</p>
+<h3 id="10-条件渲染"><a href="#10-条件渲染" class="headerlink" title="10.条件渲染"></a>10.条件渲染</h3><p>之所以可以用 条件 &amp;&amp; 组件 的方式来渲染组件。是因为在 JavaScript 中，true &amp;&amp; expression 总是会返回 expression, 而 false &amp;&amp; expression 总是会返回 false。</p>
+<p>因此，如果条件是 true，&amp;&amp; 右侧的元素就会被渲染，如果是 false，React 会忽略并跳过它。</p>
+<p>其次，在组件的 render 方法中返回 null 并不会影响组件的生命周期。即使返回null，componentDidUpdate 依然会被调用。</p>
+<h3 id="11-表单"><a href="#11-表单" class="headerlink" title="11.表单"></a>11.表单</h3><p>React中，可变状态通常保存在组件的state属性中，且只能通过setState来更新。但HTML里类似input,select,textarea等元素本身自己维护着state。</p>
+<p>一般情况下，我们还是倾向于让react的state成为组件的唯一数据源，即由react来渲染input，并控制用户输入过程中发生的操作，这样改造了的表单输入元素叫做“受控”组件。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">&lt;form ...&gt;</span><br><span class="line">    &lt;input type&#x3D;&quot;text&quot; value&#x3D;&#123;this.state.value&#125; onChange&#x3D;&#123;this.handleChange&#125; &#x2F;&gt;</span><br><span class="line">&lt;&#x2F;form&gt;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>如上,显示的值将始终为 this.state.value，这使得 React 的 state 成为唯一数据源。由于 handlechange 在每次按键时都会执行并更新 React 的 state，因此显示的值将随着用户输入而更新。</p>
+<p>对于受控组件来说，输入的值始终由 React 的 state 驱动。你也可以将 value 传递给其他 UI 元素，或者通过其他事件处理函数重置，但这意味着你需要编写更多的代码。</p>
+<p><a href="https://zh-hans.reactjs.org/docs/forms.html" target="_blank" rel="noopener">这里</a>了解诸如 textarea,select等受控组件在react中的用法。</p>
+<p>当需要处理多个 input 元素时，我们可以给每个元素添加 name 属性，并让处理函数根据 event.target.name 的值选择要执行的操作。</p>
+<p>其次，类似<code>&lt;input type=&quot;file&quot; /&gt;</code>这种value为只读的元素，它们叫做非受控组件。<br>有时使用受控组件会很麻烦，因为你需要为数据变化的每种方式都编写事件处理函数，并通过一个 React 组件传递所有的输入 state。当你将之前的代码库转换为 React 或将 React 应用程序与非 React 库集成时，这可能会令人厌烦。在这些情况下，你可能希望使用非受控组件, 这是实现输入表单的另一种方式。</p>
+<p>当然，直接找一些成熟的解决方案也是非常好的解决方式，比如<a href="https://jaredpalmer.com/formik" target="_blank" rel="noopener">Formilk</a> 就是不错的选择。但它们大多也是建立在受控组件和管理state的基础上的，所以了解一下原理并没有错。</p>
+<h3 id="12-状态提升"><a href="#12-状态提升" class="headerlink" title="12.状态提升"></a>12.状态提升</h3><p>其实关于这个，只要用过React的人就应该非常熟悉，没什么值得再进一步探讨的。这里就提炼一下要点：  </p>
+<ul>
+<li>在 React 应用中，任何可变数据应当只有一个相对应的唯一“数据源”，如果当前组件的state在其它组件中被需要，我们就应该考虑将这个变量提升到共同的父组件中。利用好自上而下的数据流。</li>
+<li>如果某些数据可以由 props 或 state 推导得出，那么它就不应该存在于 state 中。</li>
+<li>利用好<a href="https://github.com/facebook/react/tree/master/packages/react-devtools" target="_blank" rel="noopener">React开发者工具</a>来定位UI中的bug</li>
+</ul>
+<p>提升方式与双向绑定的区别与优缺点： react的这种数据单向绑定方式实际是大势所趋，使得我们在追踪数据变化和调试程序的时候逻辑更加清晰，而双向绑定虽然一定程度减少了代码量，但一让查错变得困难，二也会在大量双向绑定存在的时候产生性能问题。</p>
+<h3 id="13-不需要组件继承"><a href="#13-不需要组件继承" class="headerlink" title="13.不需要组件继承"></a>13.不需要组件继承</h3><p>组件可以接受任意 props，包括基本数据类型，React 元素以及函数。</p>
+<p>如果你想要在组件间复用非 UI 的功能，我们建议将其提取为一个单独的 JavaScript 模块，如函数、对象或者类。组件可以直接引入（import）而无需通过 extend 继承它们。</p>
+<h3 id="14-容器组件"><a href="#14-容器组件" class="headerlink" title="14.容器组件"></a>14.容器组件</h3><p>有一个特殊的prop：children。使得别的组件可以通过 JSX 嵌套，将任意组件作为子组件传递给它们。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;SomeComp color&#x3D;&quot;blue&quot;&gt;</span><br><span class="line">      &lt;h1 className&#x3D;&quot;Dialog-title&quot;&gt;</span><br><span class="line">        Welcome</span><br><span class="line">      &lt;&#x2F;h1&gt;</span><br><span class="line">      &lt;p className&#x3D;&quot;Dialog-message&quot;&gt;</span><br><span class="line">        Thank you for visiting our spacecraft!</span><br><span class="line">      &lt;&#x2F;p&gt;</span><br><span class="line">&lt;&#x2F;SomeComp&gt;</span><br></pre></td></tr></table></figure>
+<p>出现在标签开始结束标记之间的这些内容，就会在SomeComp内部以props.children的形式存在。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/React/" rel="tag"># React</a>
+              <a href="/tags/%E5%9F%BA%E7%A1%80/" rel="tag"># 基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/19/%E8%BE%B9%E5%86%99%E4%BB%A3%E7%A0%81%E8%BE%B9%E5%AD%A6%E4%B9%A0mask-rcnn/" rel="prev" title="边写代码边学习Mask-rcnn">
+      <i class="fa fa-chevron-left"></i> 边写代码边学习Mask-rcnn
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E8%BF%9B%E9%98%B6/" rel="next" title="React官方文档知识点-进阶">
+      React官方文档知识点-进阶 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#正文"><span class="nav-number">1.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-React不直接修改数据的原因："><span class="nav-number">1.0.1.</span> <span class="nav-text">1.React不直接修改数据的原因：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-函数组件"><span class="nav-number">1.0.2.</span> <span class="nav-text">2.函数组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-key"><span class="nav-number">1.0.3.</span> <span class="nav-text">3.key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-防注入攻击"><span class="nav-number">1.0.4.</span> <span class="nav-text">4.防注入攻击</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-将一个元素渲染为dom"><span class="nav-number">1.0.5.</span> <span class="nav-text">5.将一个元素渲染为dom</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-按需更新"><span class="nav-number">1.0.6.</span> <span class="nav-text">6.按需更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-组件名称必须以大写字母开头。"><span class="nav-number">1.0.7.</span> <span class="nav-text">7.组件名称必须以大写字母开头。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-生命周期"><span class="nav-number">1.0.8.</span> <span class="nav-text">8.生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-事件"><span class="nav-number">1.0.9.</span> <span class="nav-text">9.事件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-条件渲染"><span class="nav-number">1.0.10.</span> <span class="nav-text">10.条件渲染</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-表单"><span class="nav-number">1.0.11.</span> <span class="nav-text">11.表单</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-状态提升"><span class="nav-number">1.0.12.</span> <span class="nav-text">12.状态提升</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-不需要组件继承"><span class="nav-number">1.0.13.</span> <span class="nav-text">13.不需要组件继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-容器组件"><span class="nav-number">1.0.14.</span> <span class="nav-text">14.容器组件</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Toulon Du</p>
+  <div class="site-description" itemprop="description">Sharing Knowledge And Learn More</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Toulon Du</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

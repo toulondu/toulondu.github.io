@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"toulondu.github.io","root":"/","scheme":"Muse","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="承接上一篇文章。 正文1.无障碍辅助功能无障碍辅助功能是让所有人都能够获得服务的一种设计。关于React中对此功能的全面要点：点击这里 2.代码分割大多数 React 应用都会使用 Webpack，Rollup 或 Browserify 这类的构建工具来打包文件。 打包是一个将文件引入并合并到一个单独文件的过程，最终形成一个 “bundle”。 接着在页面上引入该 bundle，整个应用即可一次性">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React官方文档知识点-进阶">
+<meta property="og:url" content="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E8%BF%9B%E9%98%B6/index.html">
+<meta property="og:site_name" content="Toulon&#39;s BLOG">
+<meta property="og:description" content="承接上一篇文章。 正文1.无障碍辅助功能无障碍辅助功能是让所有人都能够获得服务的一种设计。关于React中对此功能的全面要点：点击这里 2.代码分割大多数 React 应用都会使用 Webpack，Rollup 或 Browserify 这类的构建工具来打包文件。 打包是一个将文件引入并合并到一个单独文件的过程，最终形成一个 “bundle”。 接着在页面上引入该 bundle，整个应用即可一次性">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-05-28T09:56:33.000Z">
+<meta property="article:modified_time" content="2020-05-28T10:10:06.409Z">
+<meta property="article:author" content="Toulon Du">
+<meta property="article:tag" content="React">
+<meta property="article:tag" content="基础">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E8%BF%9B%E9%98%B6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>React官方文档知识点-进阶 | Toulon's BLOG</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Toulon's BLOG</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">Algorithm</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://toulondu.github.io/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E8%BF%9B%E9%98%B6/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Toulon Du">
+      <meta itemprop="description" content="Sharing Knowledge And Learn More">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Toulon's BLOG">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          React官方文档知识点-进阶
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2020-05-28 17:56:33 / 修改时间：18:10:06" itemprop="dateCreated datePublished" datetime="2020-05-28T17:56:33+08:00">2020-05-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web%E5%89%8D%E7%AB%AF/" itemprop="url" rel="index"><span itemprop="name">web前端</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>承接上一篇文章。</p>
+<h1 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h1><h3 id="1-无障碍辅助功能"><a href="#1-无障碍辅助功能" class="headerlink" title="1.无障碍辅助功能"></a>1.无障碍辅助功能</h3><p>无障碍辅助功能是让所有人都能够获得服务的一种设计。<br>关于React中对此功能的全面要点：<a href="https://zh-hans.reactjs.org/docs/accessibility.html" target="_blank" rel="noopener">点击这里</a></p>
+<h3 id="2-代码分割"><a href="#2-代码分割" class="headerlink" title="2.代码分割"></a>2.代码分割</h3><p>大多数 React 应用都会使用 Webpack，Rollup 或 Browserify 这类的构建工具来打包文件。 打包是一个将文件引入并合并到一个单独文件的过程，最终形成一个 “bundle”。 接着在页面上引入该 bundle，整个应用即可一次性加载。</p>
+<p>而现在的前端应用大多都会整合非常多第三方库，为了避免打包出的代码包过大导致加载时间边长。我们应该尽早思考对代码进行代码分割。代码分割是上诉打包工具支持的一项技术，能够创建多个包并在运行时动态加载。<br>它可以让你“懒加载”用户所需要的内容，避免加载永远不需要的代码，并在初始加载时减少所需加载的代码量，从而显著提高应用性能。</p>
+<p>比如你的网站有20个网页，而某个用户可能只使用其中2个网页，另外18个网页的内容，用户是不需要加载的。</p>
+<p>使用方法：</p>
+<ul>
+<li><p>import</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;使用前</span><br><span class="line">import &#123; add &#125; from &#39;.&#x2F;math&#39;;</span><br><span class="line">console.log(add(16, 26));</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;使用后</span><br><span class="line">import(&quot;.&#x2F;math&quot;).then(math &#x3D;&gt; &#123;</span><br><span class="line">  console.log(math.add(16, 26));</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>如果你自己配置 Webpack，你可能要阅读下 Webpack 关于<a href="https://webpack.docschina.org/guides/code-splitting/" target="_blank" rel="noopener">代码分割</a>的指南。你的 Webpack 配置应该<a href="https://gist.github.com/gaearon/ca6e803f5c604d37468b0091d9959269" target="_blank" rel="noopener">类似于此</a>。</p>
+</li>
+<li><p>React.lazy<br>React.lazy 函数能让你像渲染常规组件一样处理动态引入（的组件）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F;使用前</span><br><span class="line">import OtherComponent from &#39;.&#x2F;OtherComponent&#39;;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F;使用后</span><br><span class="line">const OtherComponent &#x3D; React.lazy(() &#x3D;&gt; import(&#39;.&#x2F;OtherComponent&#39;));</span><br></pre></td></tr></table></figure>
+<p>此代码将会在组件首次渲染时，自动导入包含 OtherComponent 组件的包。<br>React.lazy 接受一个函数，这个函数需要动态调用 import()。它必须返回一个 Promise，该 Promise 需要 resolve 一个 default export 的 React 组件。<br>然后你应在 <strong>Suspense</strong> 组件中渲染 lazy 组件，如此使得我们可以使用在等待加载 lazy 组件时做优雅降级（如 loading 指示器等）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">import React, &#123; Suspense &#125; from &#39;react&#39;;</span><br><span class="line">const OtherComponent &#x3D; React.lazy(() &#x3D;&gt; import(&#39;.&#x2F;OtherComponent&#39;));</span><br><span class="line"></span><br><span class="line">function MyComponent() &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;Suspense fallback&#x3D;&#123;&lt;div&gt;Loading...&lt;&#x2F;div&gt;&#125;&gt;</span><br><span class="line">        &lt;OtherComponent &#x2F;&gt;</span><br><span class="line">      &lt;&#x2F;Suspense&gt;</span><br><span class="line">    &lt;&#x2F;div&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>fallback 属性接受任何在组件加载过程中你想展示的 React 元素。你可以将 Suspense 组件置于懒加载组件之上的任何位置。你甚至可以用一个 Suspense 组件包裹多个懒加载组件。</p>
+</li>
+</ul>
+<p>PS：React.lazy 目前只支持默认导出（default exports）</p>
+<ul>
+<li><p>异常捕获边界(Error boundaries)<br>如果模块加载失败（如网络问题），它会触发一个错误。你可以通过<a href="https://zh-hans.reactjs.org/docs/error-boundaries.html" target="_blank" rel="noopener">异常捕获边界（Error boundaries）</a>技术来处理这些情况，以显示良好的用户体验并管理恢复事宜。</p>
+</li>
+<li><p>基于路由的代码分割<br>另一个很简单的代码分割方式就是基于路由。<br>使用React.lazy 和 <a href="https://react-router.docschina.org/" target="_blank" rel="noopener">React Router</a> 这类的第三方库，来配置基于路由的代码分割。</p>
+</li>
+</ul>
+<h3 id="3-Context"><a href="#3-Context" class="headerlink" title="3.Context"></a>3.Context</h3><p>Context 提供了一个无需为每层组件手动添加 props，就能在组件树间进行数据传递的方法。<br>使用方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; Context 可以让我们无须明确地传遍每一个组件，就能将值深入传递进组件树。</span><br><span class="line">&#x2F;&#x2F; 为当前的 theme 创建一个 context（“light”为默认值）。</span><br><span class="line">const ThemeContext &#x3D; React.createContext(&#39;light&#39;);</span><br><span class="line">class App extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    &#x2F;&#x2F; 使用一个 Provider 来将当前的 theme 传递给以下的组件树。</span><br><span class="line">    &#x2F;&#x2F; 无论多深，任何组件都能读取这个值。</span><br><span class="line">    &#x2F;&#x2F; 在这个例子中，我们将 “dark” 作为当前的值传递下去。</span><br><span class="line">    return (</span><br><span class="line">      &lt;ThemeContext.Provider value&#x3D;&quot;dark&quot;&gt;</span><br><span class="line">        &lt;Toolbar &#x2F;&gt;</span><br><span class="line">      &lt;&#x2F;ThemeContext.Provider&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 中间的组件再也不必指明往下传递 theme 了。</span><br><span class="line">function Toolbar() &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;ThemedButton &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;div&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class ThemedButton extends React.Component &#123;</span><br><span class="line">  &#x2F;&#x2F; 指定 contextType 读取当前的 theme context。</span><br><span class="line">  &#x2F;&#x2F; React 会往上找到最近的 theme Provider，然后使用它的值。</span><br><span class="line">  &#x2F;&#x2F; 在这个例子中，当前的 theme 值为 “dark”。</span><br><span class="line">  static contextType &#x3D; ThemeContext;</span><br><span class="line">  render() &#123;</span><br><span class="line">    return &lt;Button theme&#x3D;&#123;this.context&#125; &#x2F;&gt;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请谨慎使用context，因为这会使得组件的复用性变差。</p>
+<p>如果你只是想避免层层传递一些属性，组件组合（component composition）有时候是一个比 context 更好的解决方案。</p>
+<p>比如在一个Page组件内，它层层向下传递user和avatarSize属性，从而较深的Avatar组件可以读取到这些属性。如果最后只有Avatar需要这个变量，层层传递就显得比较蠢，此时除了使用context，还可以的一种方法是直接在page中构造好avatar组件，然后传递下去。</p>
+<p>这种对组件的控制反转减少了在你的应用中要传递的 props 数量，这在很多场景下会使得你的代码更加干净，使你对根组件有更多的把控。但是，这并不适用于每一个场景：这种将逻辑提升到组件树的更高层次来处理，会使得这些高层组件变得更复杂，并且会强行将低层组件适应这样的形式，这可能不会是你想要的。</p>
+<p><a href="https://zh-hans.reactjs.org/docs/context.html" target="_blank" rel="noopener">context的使用方法</a></p>
+<h3 id="4-错误边界"><a href="#4-错误边界" class="headerlink" title="4.错误边界"></a>4.错误边界</h3><p>部分 UI 的 JavaScript 错误不应该导致整个应用崩溃，为了解决这个问题，React 16 引入了一个新的概念 —— 错误边界。</p>
+<p>错误边界是一种 React 组件，这种组件可以捕获并打印发生在其子组件树任何位置的 JavaScript 错误，并且，它会渲染出备用 UI。错误边界在渲染期间、生命周期方法和整个组件树的构造函数中捕获错误。</p>
+<p>错误边界无法捕获以下场景中产生的错误：</p>
+<ul>
+<li>事件处理,因为事件处理器不会再渲染期间触发，so使用try/catch来捕获。</li>
+<li>异步代码（例如 setTimeout 或 requestAnimationFrame 回调函数）</li>
+<li>服务端渲染</li>
+<li>它自身抛出来的错误（并非它的子组件）</li>
+</ul>
+<p>如果一个 class 组件中定义了 static <strong>getDerivedStateFromError()</strong> 或 <strong>componentDidCatch()</strong> 这两个生命周期方法中的任意一个（或两个）时，那么它就变成一个错误边界。<br>当抛出错误后，请使用 static getDerivedStateFromError() 渲染备用 UI ，使用 componentDidCatch() 打印错误信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">class ErrorBoundary extends React.Component &#123;</span><br><span class="line">  constructor(props) &#123;</span><br><span class="line">    super(props);</span><br><span class="line">    this.state &#x3D; &#123; hasError: false &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  static getDerivedStateFromError(error) &#123;</span><br><span class="line">    &#x2F;&#x2F; 更新 state 使下一次渲染能够显示降级后的 UI</span><br><span class="line">    return &#123; hasError: true &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  componentDidCatch(error, errorInfo) &#123;</span><br><span class="line">    &#x2F;&#x2F; 你同样可以将错误日志上报给服务器</span><br><span class="line">    logErrorToMyService(error, errorInfo);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    if (this.state.hasError) &#123;</span><br><span class="line">      &#x2F;&#x2F; 你可以自定义降级后的 UI 并渲染</span><br><span class="line">      return &lt;h1&gt;Something went wrong.&lt;&#x2F;h1&gt;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    return this.props.children; </span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意错误边界仅可以捕获其子组件的错误，它无法捕获其自身的错误。如果一个错误边界无法渲染错误信息，则错误会冒泡至最近的上层错误边界，这也类似于 JavaScript 中 catch {} 的工作机制。</p>
+<p>错误边界的粒度由你来决定，可以将其包装在最顶层的路由组件并为用户展示一个 “Something went wrong” 的错误信息，就像服务端框架经常处理崩溃一样。你也可以将单独的部件包装在错误边界以保护应用其他部分不崩溃。</p>
+<p>PS:自 React 16 起，任何未被错误边界捕获的错误将会导致整个 React 组件树被卸载。</p>
+<h3 id="5-Refs-和-DOM"><a href="#5-Refs-和-DOM" class="headerlink" title="5.Refs 和 DOM"></a>5.Refs 和 DOM</h3><p>Refs 提供了一种方式，允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。<br>在某些情况下，你需要在典型数据流之外强制修改子组件。被修改的子组件可能是一个 React 组件的实例，也可能是一个 DOM 元素。  </p>
+<p>下面是几个适合使用 refs 的情况：</p>
+<ul>
+<li>管理焦点，文本选择或媒体播放。</li>
+<li>触发强制动画。</li>
+<li>集成第三方 DOM 库。</li>
+</ul>
+<p>避免使用 refs 来做任何可以通过声明式实现来完成的事情。举个例子，避免在 Dialog 组件里暴露 open() 和 close() 方法，最好传递 isOpen 属性。</p>
+<p>两种使用refs的方式：<br>1.React.createRef()</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">class CustomTextInput extends React.Component &#123;</span><br><span class="line">  constructor(props) &#123;</span><br><span class="line">    super(props);</span><br><span class="line">    &#x2F;&#x2F; 创建一个 ref 来存储 textInput 的 DOM 元素</span><br><span class="line">    this.textInput &#x3D; React.createRef();</span><br><span class="line">    this.focusTextInput &#x3D; this.focusTextInput.bind(this);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  focusTextInput() &#123;</span><br><span class="line">    &#x2F;&#x2F; 直接使用原生 API 使 text 输入框获得焦点</span><br><span class="line">    &#x2F;&#x2F; 注意：我们通过 &quot;current&quot; 来访问 DOM 节点</span><br><span class="line">    this.textInput.current.focus();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    &#x2F;&#x2F; 告诉 React 我们想把 &lt;input&gt; ref 关联到</span><br><span class="line">    &#x2F;&#x2F; 构造器里创建的 &#96;textInput&#96; 上</span><br><span class="line">    return (</span><br><span class="line">      &lt;div&gt;</span><br><span class="line">        &lt;input</span><br><span class="line">          type&#x3D;&quot;text&quot;</span><br><span class="line">          ref&#x3D;&#123;this.textInput&#125; &#x2F;&gt;</span><br><span class="line">        &lt;input</span><br><span class="line">          type&#x3D;&quot;button&quot;</span><br><span class="line">          value&#x3D;&quot;Focus the text input&quot;</span><br><span class="line">          onClick&#x3D;&#123;this.focusTextInput&#125;</span><br><span class="line">        &#x2F;&gt;</span><br><span class="line">      &lt;&#x2F;div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>React 会在组件挂载时给 current 属性传入 DOM 元素，并在组件卸载时传入 null 值。ref 会在 componentDidMount 或 componentDidUpdate 生命周期钩子触发前更新。</p>
+<ul>
+<li>当 ref 属性用于 HTML 元素时，构造函数中使用 React.createRef() 创建的 ref 接收底层 DOM 元素作为其 current 属性。</li>
+<li>当 ref 属性用于自定义 class 组件时，ref 对象接收组件的挂载实例作为其 current 属性。</li>
+</ul>
+<p>2.回调ref</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">class CustomTextInput extends React.Component &#123;</span><br><span class="line">  constructor(props) &#123;</span><br><span class="line">    super(props);</span><br><span class="line"></span><br><span class="line">    this.textInput &#x3D; null;</span><br><span class="line"></span><br><span class="line">    this.setTextInputRef &#x3D; element &#x3D;&gt; &#123;</span><br><span class="line">      this.textInput &#x3D; element;</span><br><span class="line">    &#125;;</span><br><span class="line"></span><br><span class="line">    this.focusTextInput &#x3D; () &#x3D;&gt; &#123;</span><br><span class="line">      &#x2F;&#x2F; 使用原生 DOM API 使 text 输入框获得焦点</span><br><span class="line">      if (this.textInput) this.textInput.focus();</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  componentDidMount() &#123;</span><br><span class="line">    &#x2F;&#x2F; 组件挂载后，让文本框自动获得焦点</span><br><span class="line">    this.focusTextInput();</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    &#x2F;&#x2F; 使用 &#96;ref&#96; 的回调函数将 text 输入框 DOM 节点的引用存储到 React</span><br><span class="line">    &#x2F;&#x2F; 实例上（比如 this.textInput）</span><br><span class="line">    return (</span><br><span class="line">      &lt;div&gt;</span><br><span class="line">        &lt;input</span><br><span class="line">          type&#x3D;&quot;text&quot;</span><br><span class="line">          ref&#x3D;&#123;this.setTextInputRef&#125;</span><br><span class="line">        &#x2F;&gt;</span><br><span class="line">        &lt;input</span><br><span class="line">          type&#x3D;&quot;button&quot;</span><br><span class="line">          value&#x3D;&quot;Focus the text input&quot;</span><br><span class="line">          onClick&#x3D;&#123;this.focusTextInput&#125;</span><br><span class="line">        &#x2F;&gt;</span><br><span class="line">      &lt;&#x2F;div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果 ref 回调函数是以内联函数的方式定义的，在更新过程中它会被执行两次，第一次传入参数 null，然后第二次会传入参数 DOM 元素。这是因为在每次渲染时会创建一个新的函数实例，所以 React 清空旧的 ref 并且设置新的。通过将 ref 的回调函数定义成 class 的绑定函数的方式可以避免上述问题，但是大多数情况下它是无关紧要的。</p>
+<p>注：var func_name = function(){}这种形式定义的函数为内联函数。</p>
+<p>在极少数情况下，你可能希望在父组件中引用子节点的 DOM 节点。通常不建议这样做，因为它会打破组件的封装，但它偶尔可用于触发焦点或测量子 DOM 节点的大小或位置。<br>这种情况下我们推荐使用 <a href="https://zh-hans.reactjs.org/docs/forwarding-refs.html" target="_blank" rel="noopener">ref 转发</a>。Ref 转发使组件可以像暴露自己的 ref 一样暴露子组件的 ref。关于怎样对父组件暴露子组件的 DOM 节点，在 ref 转发文档中有一个详细的例子。</p>
+<h3 id="6-Fragments"><a href="#6-Fragments" class="headerlink" title="6.Fragments"></a>6.Fragments</h3><p>React 中的一个常见模式是一个组件返回多个元素。Fragments 允许你将子列表分组，而无需向 DOM 添加额外节点。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">render() &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;React.Fragment&gt;</span><br><span class="line">      &lt;ChildA &#x2F;&gt;</span><br><span class="line">      &lt;ChildB &#x2F;&gt;</span><br><span class="line">      &lt;ChildC &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;React.Fragment&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>还有一种段语法,看起来有点诡异，即空标签：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">class Columns extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;&gt;</span><br><span class="line">        &lt;td&gt;Hello&lt;&#x2F;td&gt;</span><br><span class="line">        &lt;td&gt;World&lt;&#x2F;td&gt;</span><br><span class="line">      &lt;&#x2F;&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用显式 &lt;React.Fragment&gt; 语法声明的片段可能具有 key。一个使用场景是将一个集合映射到一个 Fragments 数组。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">function Glossary(props) &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;dl&gt;</span><br><span class="line">      &#123;props.items.map(item &#x3D;&gt; (</span><br><span class="line">        &#x2F;&#x2F; 没有&#96;key&#96;，React 会发出一个关键警告</span><br><span class="line">        &lt;React.Fragment key&#x3D;&#123;item.id&#125;&gt;</span><br><span class="line">          &lt;dt&gt;&#123;item.term&#125;&lt;&#x2F;dt&gt;</span><br><span class="line">          &lt;dd&gt;&#123;item.description&#125;&lt;&#x2F;dd&gt;</span><br><span class="line">        &lt;&#x2F;React.Fragment&gt;</span><br><span class="line">      ))&#125;</span><br><span class="line">    &lt;&#x2F;dl&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>key 是目前唯一可以传递给 Fragment 的属性。</p>
+<h3 id="7-高阶组件"><a href="#7-高阶组件" class="headerlink" title="7.高阶组件"></a>7.高阶组件</h3><p>高阶组件（HOC）是 React 中用于复用组件逻辑的一种高级技巧。HOC 自身不是 React API 的一部分，它是一种基于 React 的组合特性而形成的设计模式。</p>
+<p>可以对应高阶函数来理解，高阶函数为函数作为参数传递，函数作为返回值。<br>而高阶组件则是参数为组件，返回值为新组件的函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">const EnhancedComponent &#x3D; higherOrderComponent(WrappedComponent);</span><br></pre></td></tr></table></figure>
+<p>HOC 在 React 的第三方库中很常见，例如 Redux 的 connect 和 Relay 的 createFragmentContainer。</p>
+<p>一大作用就是将组件间相同的业务逻辑进行抽象，比如2个组件都依赖于某个外部数据进行渲染，那么获取这个外部数据和监听其改变的方式就可以放到高阶组件中进行：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 此函数接收一个组件...</span><br><span class="line">function withSubscription(WrappedComponent, selectData) &#123;</span><br><span class="line">  &#x2F;&#x2F; ...并返回另一个组件...</span><br><span class="line">  return class extends React.Component &#123;</span><br><span class="line">    constructor(props) &#123;</span><br><span class="line">      super(props);</span><br><span class="line">      this.handleChange &#x3D; this.handleChange.bind(this);</span><br><span class="line">      this.state &#x3D; &#123;</span><br><span class="line">        data: selectData(DataSource, props)</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentDidMount() &#123;</span><br><span class="line">      &#x2F;&#x2F; ...负责订阅相关的操作...</span><br><span class="line">      DataSource.addChangeListener(this.handleChange);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    componentWillUnmount() &#123;</span><br><span class="line">      DataSource.removeChangeListener(this.handleChange);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    handleChange() &#123;</span><br><span class="line">      this.setState(&#123;</span><br><span class="line">        data: selectData(DataSource, this.props)</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    render() &#123;</span><br><span class="line">      &#x2F;&#x2F; ... 并使用新数据渲染被包装的组件!</span><br><span class="line">      &#x2F;&#x2F; 请注意，我们可能还会传递其他属性</span><br><span class="line">      return &lt;WrappedComponent data&#x3D;&#123;this.state.data&#125; &#123;...this.props&#125; &#x2F;&gt;;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>HOC 不会修改传入的组件，也不会使用继承来复制其行为。相反，HOC 通过将组件包装在容器组件中来组成新组件。HOC 是纯函数，没有副作用。HOC 不需要关心数据的使用方式或原因，而被包装组件也不需要关心数据是怎么来的。</p>
+<p>不要试图在 HOC 中修改组件原型（或以其他方式改变它）。因为这种修改会导致组件行为永远发生变化。</p>
+<p>HOC 不应该修改传入组件，而应该使用组合的方式，通过将组件包装在容器组件中实现功能：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">function logProps(WrappedComponent) &#123;</span><br><span class="line">  return class extends React.Component &#123;</span><br><span class="line">    componentDidUpdate(prevProps) &#123;</span><br><span class="line">      console.log(&#39;Current props: &#39;, this.props);</span><br><span class="line">      console.log(&#39;Previous props: &#39;, prevProps);</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">      &#x2F;&#x2F; 将 input 组件包装在容器中，而不对其进行修改。Good!</span><br><span class="line">      return &lt;WrappedComponent &#123;...this.props&#125; &#x2F;&gt;;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>您可能已经注意到 HOC 与容器组件模式之间有相似之处。容器组件担任分离将高层和低层关注的责任，由容器管理订阅和状态，并将 prop 传递给处理渲染 UI。HOC 使用容器作为其实现的一部分，你可以将 HOC 视为参数化容器组件。</p>
+<p>来看看redux的connect</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; React Redux 的 &#96;connect&#96; 函数</span><br><span class="line">const ConnectedComment &#x3D; connect(commentSelector, commentActions)(CommentList);</span><br></pre></td></tr></table></figure>
+<p>发生了什么？！如果你把它分开，就会更容易看出发生了什么。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; connect 是一个函数，它的返回值为另外一个函数。</span><br><span class="line">const enhance &#x3D; connect(commentListSelector, commentListActions);</span><br><span class="line">&#x2F;&#x2F; 返回值为 HOC，它会返回已经连接 Redux store 的组件</span><br><span class="line">const ConnectedComment &#x3D; enhance(CommentList);</span><br></pre></td></tr></table></figure>
+<p>换句话说，connect 是一个返回高阶组件的高阶函数！</p>
+<p>这种形式可能看起来令人困惑或不必要，但它有一个有用的属性, 充当装饰器，多个装饰器可以一起使用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 而不是这样...</span><br><span class="line">const EnhancedComponent &#x3D; withRouter(connect(commentSelector)(WrappedComponent))</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; ... 你可以编写组合工具函数</span><br><span class="line">&#x2F;&#x2F; compose(f, g, h) 等同于 (...args) &#x3D;&gt; f(g(h(...args)))</span><br><span class="line">const enhance &#x3D; compose(</span><br><span class="line">  &#x2F;&#x2F; 这些都是单参数的 HOC</span><br><span class="line">  withRouter,</span><br><span class="line">  connect(commentSelector)</span><br><span class="line">)</span><br><span class="line">const EnhancedComponent &#x3D; enhance(WrappedComponent)</span><br></pre></td></tr></table></figure>
+<p>许多第三方库都提供了 compose 工具函数，包括 lodash （比如 lodash.flowRight）， Redux 和 Ramda。</p>
+<p>注意点：</p>
+<ul>
+<li>不要在 render 方法中使用 HOC</li>
+<li>务必复制静态方法</li>
+<li>Refs 不会被传递</li>
+</ul>
+<h3 id="8-与其它视图库集成"><a href="#8-与其它视图库集成" class="headerlink" title="8.与其它视图库集成"></a>8.与其它视图库集成</h3><p>得益于 ReactDOM.render() 的灵活性 React 可以被嵌入到其他的应用中。</p>
+<p>虽然 React 通常被用来在启动的时候加载一个单独的根 React 组件到 DOM 上，ReactDOM.render() 同样可以在 UI 的独立部分上多次调用，这些部分可以小到一个按钮，也可以大到一个应用。<br>如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$(&#39;#container&#39;).html(&#39;&lt;button id&#x3D;&quot;btn&quot;&gt;Say Hello&lt;&#x2F;button&gt;&#39;);</span><br><span class="line">$(&#39;#btn&#39;).click(function() &#123;</span><br><span class="line">  alert(&#39;Hello!&#39;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>改造成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">function Button(props) &#123;</span><br><span class="line">  return &lt;button onClick&#x3D;&#123;props.onClick&#125;&gt;Say Hello&lt;&#x2F;button&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">function HelloButton() &#123;</span><br><span class="line">  function handleClick() &#123;</span><br><span class="line">    alert(&#39;Hello!&#39;);</span><br><span class="line">  &#125;</span><br><span class="line">  return &lt;Button onClick&#x3D;&#123;handleClick&#125; &#x2F;&gt;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">ReactDOM.render(</span><br><span class="line">  &lt;HelloButton &#x2F;&gt;,</span><br><span class="line">  document.getElementById(&#39;container&#39;)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-深入JSX"><a href="#9-深入JSX" class="headerlink" title="9.深入JSX"></a>9.深入JSX</h3><p>实际上，JSX 仅仅只是 React.createElement(component, props, …children) 函数的语法糖。<br>值得说的点：</p>
+<ul>
+<li><p>Props 默认值为 “True”，如果你没给 prop 赋值，它的默认值是 true。以下两个 JSX 表达式是等价的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;MyTextBox autocomplete &#x2F;&gt;</span><br><span class="line"></span><br><span class="line">&lt;MyTextBox autocomplete&#x3D;&#123;true&#125; &#x2F;&gt;</span><br></pre></td></tr></table></figure></li>
+<li><p>属性展开：如果你已经有了一个 props 对象，你可以使用展开运算符 … 来在 JSX 中传递整个 props 对象。还可以选择只保留当前组件需要接收的 props，并使用展开运算符将其他 props 传递下去。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">const Button &#x3D; props &#x3D;&gt; &#123;</span><br><span class="line">  const &#123; kind, ...other &#125; &#x3D; props;</span><br><span class="line">  const className &#x3D; kind &#x3D;&#x3D;&#x3D; &quot;primary&quot; ? &quot;PrimaryButton&quot; : &quot;SecondaryButton&quot;;</span><br><span class="line">  return &lt;button className&#x3D;&#123;className&#125; &#123;...other&#125; &#x2F;&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></li>
+<li><p>函数作为子元素。 你可以将任何东西作为子元素传递给自定义组件，只要确保在该组件渲染之前能够被转换成 React 理解的对象。这种用法并不常见，但可以用于扩展 JSX。</p>
+</li>
+<li><p>false, null, undefined, and true 是合法的子元素。但它们并不会被渲染。值得注意的是有一些 “falsy” 值，如数字 0，仍然会被 React 渲染。 所以不要用 aa.length &amp;&amp; Component 这种形式。改成aa.length&gt;0即可。</p>
+</li>
+</ul>
+<h3 id="10-性能优化"><a href="#10-性能优化" class="headerlink" title="10.性能优化"></a>10.性能优化</h3><p>UI 更新需要昂贵的 DOM 操作，而 React 内部使用几种巧妙的技术以便最小化 DOM 操作次数。</p>
+<p><strong>首先，使用生产版本。</strong><br>React 默认包含了许多有用的警告信息。这些警告信息在开发过程中非常有帮助。然而这使得 React 变得更大且更慢，所以你需要确保部署时使用了生产版本。可通过chrome的<a href="https://chrome.google.com/webstore/detail/react-developer-tools/fmkadmapgofadopljbjfkapdkoienihi" target="_blank" rel="noopener">React开发者工具来检查</a>。图标为蓝色表示生产版本，图片红色表示开发模式。<br><a href="https://zh-hans.reactjs.org/docs/optimizing-performance.html" target="_blank" rel="noopener">这里</a>有webpack,Brunch,Browserify,Rollup来进行生产构建的方法。</p>
+<p><strong>使用chrome performance标签分析组件</strong><br>在开发模式下，你可以通过支持的浏览器可视化地了解组件是如何 挂载、更新以及卸载的。<br>在 Chrome 中进行如下操作：</p>
+<ol>
+<li>临时禁用所有的 Chrome 扩展，尤其是 React 开发者工具。他们会严重干扰度量结果！</li>
+<li>确保你是在 React 的开发模式下运行应用。</li>
+<li>打开 Chrome 开发者工具的 Performance 标签并按下 Record。</li>
+<li>对你想分析的行为进行复现。尽量在 20 秒内完成以避免 Chrome 卡住。</li>
+<li>停止记录。</li>
+<li>在 User Timing 标签下会显示 React 归类好的事件。<br>这能帮助你查看是否有不相关的组件被错误地更新，以及 UI 更新的深度和频率。</li>
+</ol>
+<p><strong>使用开发者工具中的分析器对组件进行分析</strong><br>在开发模式下，React 开发者工具会出现分析器标签。 你可以在<a href="https://zh-hans.reactjs.org/blog/2018/09/10/introducing-the-react-profiler.html" target="_blank" rel="noopener">《介绍 React 分析器》</a>这篇博客中了解概述。 你也可以在 <a href="https://www.youtube.com/watch?v=nySib7ipZdk" target="_blank" rel="noopener">YouTube</a> 上观看分析器的视频指导。</p>
+<p><strong>虚拟化长列表</strong><br>如果你的应用渲染了长列表（上百甚至上千的数据），我们推荐使用“虚拟滚动”技术。这项技术会在有限的时间内仅渲染有限的内容，并奇迹般地降低重新渲染组件消耗的时间，以及创建 DOM 节点的数量。</p>
+<p><a href="https://react-window.now.sh/" target="_blank" rel="noopener">react-window</a> 和 <a href="https://bvaughn.github.io/react-virtualized/" target="_blank" rel="noopener">react-virtualized</a> 是热门的虚拟滚动库。 它们提供了多种可复用的组件，用于展示列表、网格和表格数据。 如果你想要一些针对你的应用做定制优化，你也可以创建你自己的虚拟滚动组件，就像 Twitter 所做的。</p>
+<p><strong>避免调停</strong><br>React 构建并维护了一套内部的 UI 渲染描述。它包含了来自你的组件返回的 React 元素。即虚拟DOM，使得 React 避免创建 DOM 节点以及没有必要的节点访问，因为 DOM 操作相对于 JavaScript 对象操作更慢。</p>
+<p>当一个组件的 props 或 state 变更，React 会将最新返回的元素与之前渲染的元素进行对比，以此决定是否有必要更新真实的 DOM。当它们不相同时，React 会更新该 DOM。<br>即使 React 只更新改变了的 DOM 节点，重新渲染仍然花费了一些时间。在大部分情况下它并不是问题，不过如果它已经慢到让人注意了，你可以通过覆盖生命周期方法 shouldComponentUpdate 来进行提速。该方法会在重新渲染前被触发。其默认实现总是返回 true，让 React 执行更新。<br>如果你知道在什么情况下你的组件不需要更新，你可以在 shouldComponentUpdate 中返回 false 来跳过整个渲染过程。其包括该组件的 render 调用以及之后的操作。<br>在大部分情况下，你可以继承 React.PureComponent 以代替手写 shouldComponentUpdate()。它用当前与之前 props 和 state 的浅比较覆写了 shouldComponentUpdate() 的实现。</p>
+<p><strong>不可变数据的力量</strong><br>这点之前已经说过，比如对于数组，用concat避免直接在原来的数组上push。 对于对象，用Object.assign避免直接修改对象中的值。</p>
+<p>当处理深层嵌套对象时，以 immutable （不可变）的方式更新它们令人费解。如遇到此类问题，请参阅 <a href="https://github.com/mweststrate/immer" target="_blank" rel="noopener">Immer</a> 或 <a href="https://github.com/kolodny/immutability-helper" target="_blank" rel="noopener">immutability-helper</a>。这些库会帮助你编写高可读性的代码，且不会失去 immutability （不可变性）带来的好处。</p>
+<h3 id="11-Portals"><a href="#11-Portals" class="headerlink" title="11.Portals"></a>11.Portals</h3><p>Portal 提供了一种将子节点渲染到存在于父组件以外的 DOM 节点的优秀的方案。</p>
+<p>通常来讲，当你从组件的 render 方法返回一个元素时，该元素将被挂载到 DOM 节点中离其最近的父节点。然而，有时候将子元素插入到 DOM 节点中的不同位置也是有好处的。<br>一个 portal 的典型用例是当父组件有 overflow: hidden 或 z-index 样式时，但你需要子组件能够在视觉上“跳出”其容器。例如，对话框、悬浮卡以及提示框。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">render() &#123;</span><br><span class="line">  &#x2F;&#x2F; React 并*没有*创建一个新的 div。它只是把子元素渲染到 &#96;domNode&#96; 中。</span><br><span class="line">  &#x2F;&#x2F; &#96;domNode&#96; 是一个可以在任何位置的有效 DOM 节点。</span><br><span class="line">  return ReactDOM.createPortal(</span><br><span class="line">    this.props.children,</span><br><span class="line">    domNode</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PS:当在使用 portal 时, 记住<a href="https://zh-hans.reactjs.org/docs/accessibility.html#programmatically-managing-focus" target="_blank" rel="noopener">管理键盘焦点</a>就变得尤为重要。</p>
+<p>对于模态对话框，通过遵循 <a href="https://www.w3.org/TR/wai-aria-practices-1.1/#dialog_modal" target="_blank" rel="noopener">WAI-ARIA 模态开发实践</a>，来确保每个人都能够运用它。</p>
+<p><a href="https://codepen.io/gaearon/pen/yzMaBd" target="_blank" rel="noopener">这里</a>有一个关于用portal创建模态对话框的示例。</p>
+<p>一个从 portal 内部触发的事件会一直冒泡至包含 React 树的祖先，即便这些元素并不是 DOM 树 中的祖先。假设存在如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">  &lt;body&gt;</span><br><span class="line">    &lt;div id&#x3D;&quot;app-root&quot;&gt;&lt;&#x2F;div&gt;</span><br><span class="line">    &lt;div id&#x3D;&quot;modal-root&quot;&gt;&lt;&#x2F;div&gt;</span><br><span class="line">  &lt;&#x2F;body&gt;</span><br><span class="line">&lt;&#x2F;html&gt;</span><br></pre></td></tr></table></figure>
+<p>在 #app-root 里的 Parent 组件能够捕获到未被捕获的从兄弟节点 #modal-root 冒泡上来的事件。<br><a href="https://codepen.io/gaearon/pen/jGBWpE" target="_blank" rel="noopener">codepen实例</a><br>在父组件里捕获一个来自 portal 冒泡上来的事件，使之能够在开发时具有不完全依赖于 portal 的更为灵活的抽象。例如，如果你在渲染一个 <Modal /> 组件，无论其是否采用 portal 实现，父组件都能够捕获其事件。</p>
+<h3 id="12-Profiler-API"><a href="#12-Profiler-API" class="headerlink" title="12.Profiler API"></a>12.Profiler API</h3><p>Profiler 测量渲染一个 React 应用多久渲染一次以及渲染一次的“代价”。 它的目的是识别出应用中渲染较慢的部分，或是可以使用类似 <a href="https://zh-hans.reactjs.org/docs/hooks-faq.html#how-to-memoize-calculations" target="_blank" rel="noopener">memoization 优化</a>的部分，并从相关优化中获益。<br><a href="https://zh-hans.reactjs.org/docs/profiler.html" target="_blank" rel="noopener">这里</a>了解详情。</p>
+<h3 id="13-React-Diffing的原理-协调算法"><a href="#13-React-Diffing的原理-协调算法" class="headerlink" title="13.React Diffing的原理 协调算法"></a>13.React Diffing的原理 协调算法</h3><p>在某一时间节点调用 React 的 render() 方法，会创建一棵由 React 元素组成的树。在下一次 state 或 props 更新时，相同的 render() 方法会返回一棵不同的树。React 需要基于这两棵树之间的差别来判断如何有效率的更新 UI 以保证当前 UI 与最新的树保持同步。<br>这个算法问题有一些通用的解决方案，即生成将一棵树转换成另一棵树的最小操作数。 然而，即使在最前沿的算法中，该算法的复杂程度为 O(n 3 )，其中 n 是树中元素的数量。<br>这无疑有些难以接受，React基于真实使用环境做出2个假设，在其基础上提出了一套O(n)的算法：</p>
+<ol>
+<li>两个不同类型的元素会产生出不同的树；</li>
+<li>开发者可以通过 key prop 来暗示哪些子元素在不同的渲染下能保持稳定；</li>
+</ol>
+<p><strong>Diffing算法</strong><br>当对比两颗树时，React 首先比较两棵树的根节点。不同类型的根节点元素会有不同的形态。</p>
+<ol>
+<li>比对不同类型的元素<br>当根节点为不同类型的元素时，React 会拆卸原有的树并且建立起新的树。<br>当拆卸一棵树时，对应的 DOM 节点也会被销毁。在根节点以下的组件也会被卸载，它们的状态会被销毁。</li>
+<li>比对同一类型的元素<br>当比对两个相同类型的 React 元素时，React 会保留 DOM 节点，仅比对及更新有改变的属性。比如className变了就只更新className属性，当style属性更新是，也仅更新有所改变的属性，比如color等。<br>处理完当前节点之后，React 继续对子节点进行递归。</li>
+<li>比对同类型的组件元素<br>当一个组件更新时，组件实例保持不变，这样 state 在跨越不同的渲染时保持一致。React 将更新该组件实例的 props 以跟最新的元素保持一致，并且调用该实例的 componentWillReceiveProps() 和 componentWillUpdate() 方法。<br>下一步，调用 render() 方法，diff 算法将在之前的结果以及新的结果中进行递归。</li>
+<li>对子节点进行递归<br>在默认条件下，当递归 DOM 节点的子元素时，React 会同时遍历两个子元素的列表；当产生差异时，生成一个 mutation。<br>在子元素列表末尾新增元素时，更变开销比较小。React 会针对每个子元素 mutate 而不是保持相同的 <code>&lt;li&gt;Duke&lt;/li&gt;</code> 和 <code>&lt;li&gt;Villanova&lt;/li&gt;</code> 子树完成。这种情况下的低效可能会带来性能问题。<br>所以引进了key属性。</li>
+</ol>
+<p><strong>总之</strong><br>React 可以在每个 action 之后对整个应用进行重新渲染，得到的最终结果也会是一样的。在此情境下，重新渲染表示在所有组件内调用 render 方法，这不代表 React 会卸载或装载它们。React 只会基于以上提到的规则来决定如何进行差异的合并。<br>由于 React 依赖探索的算法，因此当以下假设没有得到满足，性能会有所损耗。</p>
+<ol>
+<li>该算法不会尝试匹配不同组件类型的子树。如果你发现你在两种不同类型的组件中切换，但输出非常相似的内容，建议把它们改成同一类型。在实践中，我们没有遇到这类问题。</li>
+<li>Key 应该具有稳定，可预测，以及列表内唯一的特质。不稳定的 key（比如通过 Math.random() 生成的）会导致许多组件实例和 DOM 节点被不必要地重新创建，这可能导致性能下降和子组件中的状态丢失。</li>
+</ol>
+<h3 id="14-render-props"><a href="#14-render-props" class="headerlink" title="14.render props"></a>14.render props</h3><p>术语 “render prop” 是指一种在 React 组件之间使用一个值为函数的 prop 共享代码的简单技术</p>
+<p>具有 render prop 的组件接受一个函数，该函数返回一个 React 元素并调用它而不是实现自己的渲染逻辑。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;DataProvider render&#x3D;&#123;data &#x3D;&gt; (</span><br><span class="line">  &lt;h1&gt;Hello &#123;data.target&#125;&lt;&#x2F;h1&gt;</span><br><span class="line">)&#125;&#x2F;&gt;</span><br></pre></td></tr></table></figure>
+<p>使用 render prop 的库有 React Router、Downshift 以及 Formik。<br>更具体地说，render prop 是一个用于告知组件需要渲染什么内容的函数 prop。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">class Cat extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    const mouse &#x3D; this.props.mouse;</span><br><span class="line">    return (</span><br><span class="line">      &lt;img src&#x3D;&quot;&#x2F;cat.jpg&quot; style&#x3D;&#123;&#123; position: &#39;absolute&#39;, left: mouse.x, top: mouse.y &#125;&#125; &#x2F;&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class Mouse extends React.Component &#123;</span><br><span class="line">  constructor(props) &#123;</span><br><span class="line">    super(props);</span><br><span class="line">    this.handleMouseMove &#x3D; this.handleMouseMove.bind(this);</span><br><span class="line">    this.state &#x3D; &#123; x: 0, y: 0 &#125;;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  handleMouseMove(event) &#123;</span><br><span class="line">    this.setState(&#123;</span><br><span class="line">      x: event.clientX,</span><br><span class="line">      y: event.clientY</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;div style&#x3D;&#123;&#123; height: &#39;100vh&#39; &#125;&#125; onMouseMove&#x3D;&#123;this.handleMouseMove&#125;&gt;</span><br><span class="line"></span><br><span class="line">        &#123;&#x2F;*</span><br><span class="line">          Instead of providing a static representation of what &lt;Mouse&gt; renders,</span><br><span class="line">          use the &#96;render&#96; prop to dynamically determine what to render.</span><br><span class="line">        *&#x2F;&#125;</span><br><span class="line">        &#123;this.props.render(this.state)&#125;</span><br><span class="line">      &lt;&#x2F;div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">class MouseTracker extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;div&gt;</span><br><span class="line">        &lt;h1&gt;移动鼠标!&lt;&#x2F;h1&gt;</span><br><span class="line">        &lt;Mouse render&#x3D;&#123;mouse &#x3D;&gt; (</span><br><span class="line">          &lt;Cat mouse&#x3D;&#123;mouse&#125; &#x2F;&gt;</span><br><span class="line">        )&#125;&#x2F;&gt;</span><br><span class="line">      &lt;&#x2F;div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这项技术使我们共享行为非常容易。要获得这个行为，只要渲染一个带有 render prop 的 <Mouse> 组件就能够告诉它当前鼠标坐标 (x, y) 要渲染什么。</p>
+<p>关于 render prop 一个有趣的事情是你可以使用带有 render prop 的常规组件来实现大多数高阶组件 (HOC)。 例如，如果你更喜欢使用 withMouse HOC而不是 <Mouse> 组件，你可以使用带有 render prop 的常规 <Mouse> 轻松创建一个</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; 如果你出于某种原因真的想要 HOC，那么你可以轻松实现</span><br><span class="line">&#x2F;&#x2F; 使用具有 render prop 的普通组件创建一个！</span><br><span class="line">function withMouse(Component) &#123;</span><br><span class="line">  return class extends React.Component &#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">      return (</span><br><span class="line">        &lt;Mouse render&#x3D;&#123;mouse &#x3D;&gt; (</span><br><span class="line">          &lt;Component &#123;...this.props&#125; mouse&#x3D;&#123;mouse&#125; &#x2F;&gt;</span><br><span class="line">        )&#125;&#x2F;&gt;</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>重要的是要记住，render prop 是因为模式才被称为 render prop ，你不一定要用名为 render 的 prop 来使用这种模式。事实上， <strong>任何被用于告知组件需要渲染什么内容的函数 prop 在技术上都可以被称为 “render prop”.</strong></p>
+<h3 id="15-静态类型检查"><a href="#15-静态类型检查" class="headerlink" title="15.静态类型检查"></a>15.静态类型检查</h3><p>像 Flow 和 TypeScript 等这些静态类型检查器，可以在运行前识别某些类型的问题。他们还可以通过增加自动补全等功能来改善开发者的工作流程。出于这个原因，我们建议在大型代码库中使用 Flow 或 TypeScript 来代替 PropTypes。</p>
+<p>Flow介绍在<a href="https://zh-hans.reactjs.org/docs/static-type-checking.html" target="_blank" rel="noopener">这里</a></p>
+<p><strong>typescript</strong><br>TypeScript 是一种由微软开发的编程语言。它是 JavaScript 的一个类型超集，包含独立的编译器。作为一种类型语言，TypeScript 可以在构建时发现 bug 和错误，这样程序运行时就可以避免此类错误。您可以通过<a href="https://github.com/Microsoft/TypeScript-React-Starter#typescript-react-starter" target="_blank" rel="noopener">此文档</a> 了解更多有关在 React 中使用 TypeScript 的知识。</p>
+<p>完成以下步骤，便可开始使用 TypeScript：</p>
+<ul>
+<li>将 TypeScript 添加到你的项目依赖中。</li>
+<li>配置 TypeScript 编译选项</li>
+<li>使用正确的文件扩展名</li>
+<li>为你使用的库添加定义</li>
+</ul>
+<p>如果你使用create-react-app,那么使用<code>npx create-react-app my-app --template typescript</code>即可创建一个使用TypeScript的新项目。</p>
+<p>关于怎么在现有项目中引入TS，见<a href="https://zh-hans.reactjs.org/docs/static-type-checking.html" target="_blank" rel="noopener">这里</a></p>
+<p><strong>Kotlin</strong><br>Kotlin 是由 JetBrains 开发的一门静态类型语言。其目标平台包括 JVM、Android、LLVM 和 JavaScript。</p>
+<p>JetBrains 专门为 React 社区开发和维护了几个工具：React bindings 以及 Create React Kotlin App。后者可以通过 Kotlin 快速编写 React 应用程序，并且不需要构建配置。</p>
+<h3 id="16-严格模式"><a href="#16-严格模式" class="headerlink" title="16.严格模式"></a>16.严格模式</h3><p>StrictMode 是一个用来突出显示应用程序中潜在问题的工具。与 Fragment 一样，StrictMode 不会渲染任何可见的 UI。它为其后代元素触发额外的检查和警告。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">import React from &#39;react&#39;;</span><br><span class="line"></span><br><span class="line">function ExampleApplication() &#123;</span><br><span class="line">  return (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;Header &#x2F;&gt;</span><br><span class="line">      &lt;React.StrictMode&gt;</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">          &lt;ComponentOne &#x2F;&gt;</span><br><span class="line">          &lt;ComponentTwo &#x2F;&gt;</span><br><span class="line">        &lt;&#x2F;div&gt;</span><br><span class="line">      &lt;&#x2F;React.StrictMode&gt;</span><br><span class="line">      &lt;Footer &#x2F;&gt;</span><br><span class="line">    &lt;&#x2F;div&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>StrictMode 目前有助于：</p>
+<ul>
+<li>识别不安全的生命周期</li>
+<li>关于使用过时字符串 ref API 的警告</li>
+<li>关于使用废弃的 findDOMNode 方法的警告</li>
+<li>检测意外的副作用</li>
+<li>检测过时的 context API<br>详情见<a href="https://zh-hans.reactjs.org/docs/strict-mode.html" target="_blank" rel="noopener">这里</a></li>
+</ul>
+<h3 id="17-PropTypes-类型检查"><a href="#17-PropTypes-类型检查" class="headerlink" title="17.PropTypes 类型检查"></a>17.PropTypes 类型检查</h3><p>第15点中说过，Flow和TypeScript可以对整个应用程序进行类型检查，但如果你没有使用这些扩展。你可以使用内置的PropTypes来进行类型检查。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">import PropTypes from &#39;prop-types&#39;;</span><br><span class="line"></span><br><span class="line">class Greeting extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;h1&gt;Hello, &#123;this.props.name&#125;&lt;&#x2F;h1&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Greeting.propTypes &#x3D; &#123;</span><br><span class="line">  name: PropTypes.string</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>当传入的 prop 值类型不正确时，JavaScript 控制台将会显示警告。出于性能方面的考虑，propTypes 仅在开发模式下进行检查。</p>
+<p>类型很多，如下，还可以自定义：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br></pre></td><td class="code"><pre><span class="line">import PropTypes from &#39;prop-types&#39;;</span><br><span class="line"></span><br><span class="line">MyComponent.propTypes &#x3D; &#123;</span><br><span class="line">  &#x2F;&#x2F; 你可以将属性声明为 JS 原生类型，默认情况下</span><br><span class="line">  &#x2F;&#x2F; 这些属性都是可选的。</span><br><span class="line">  optionalArray: PropTypes.array,</span><br><span class="line">  optionalBool: PropTypes.bool,</span><br><span class="line">  optionalFunc: PropTypes.func,</span><br><span class="line">  optionalNumber: PropTypes.number,</span><br><span class="line">  optionalObject: PropTypes.object,</span><br><span class="line">  optionalString: PropTypes.string,</span><br><span class="line">  optionalSymbol: PropTypes.symbol,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 任何可被渲染的元素（包括数字、字符串、元素或数组）</span><br><span class="line">  &#x2F;&#x2F; (或 Fragment) 也包含这些类型。</span><br><span class="line">  optionalNode: PropTypes.node,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 一个 React 元素。</span><br><span class="line">  optionalElement: PropTypes.element,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 一个 React 元素类型（即，MyComponent）。</span><br><span class="line">  optionalElementType: PropTypes.elementType,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 你也可以声明 prop 为类的实例，这里使用</span><br><span class="line">  &#x2F;&#x2F; JS 的 instanceof 操作符。</span><br><span class="line">  optionalMessage: PropTypes.instanceOf(Message),</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 你可以让你的 prop 只能是特定的值，指定它为</span><br><span class="line">  &#x2F;&#x2F; 枚举类型。</span><br><span class="line">  optionalEnum: PropTypes.oneOf([&#39;News&#39;, &#39;Photos&#39;]),</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 一个对象可以是几种类型中的任意一个类型</span><br><span class="line">  optionalUnion: PropTypes.oneOfType([</span><br><span class="line">    PropTypes.string,</span><br><span class="line">    PropTypes.number,</span><br><span class="line">    PropTypes.instanceOf(Message)</span><br><span class="line">  ]),</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 可以指定一个数组由某一类型的元素组成</span><br><span class="line">  optionalArrayOf: PropTypes.arrayOf(PropTypes.number),</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 可以指定一个对象由某一类型的值组成</span><br><span class="line">  optionalObjectOf: PropTypes.objectOf(PropTypes.number),</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 可以指定一个对象由特定的类型值组成</span><br><span class="line">  optionalObjectWithShape: PropTypes.shape(&#123;</span><br><span class="line">    color: PropTypes.string,</span><br><span class="line">    fontSize: PropTypes.number</span><br><span class="line">  &#125;),</span><br><span class="line">  </span><br><span class="line">  &#x2F;&#x2F; An object with warnings on extra properties</span><br><span class="line">  optionalObjectWithStrictShape: PropTypes.exact(&#123;</span><br><span class="line">    name: PropTypes.string,</span><br><span class="line">    quantity: PropTypes.number</span><br><span class="line">  &#125;),   </span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 你可以在任何 PropTypes 属性后面加上 &#96;isRequired&#96; ，确保</span><br><span class="line">  &#x2F;&#x2F; 这个 prop 没有被提供时，会打印警告信息。</span><br><span class="line">  requiredFunc: PropTypes.func.isRequired,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 任意类型的数据</span><br><span class="line">  requiredAny: PropTypes.any.isRequired,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 你可以指定一个自定义验证器。它在验证失败时应返回一个 Error 对象。</span><br><span class="line">  &#x2F;&#x2F; 请不要使用 &#96;console.warn&#96; 或抛出异常，因为这在 &#96;onOfType&#96; 中不会起作用。</span><br><span class="line">  customProp: function(props, propName, componentName) &#123;</span><br><span class="line">    if (!&#x2F;matchme&#x2F;.test(props[propName])) &#123;</span><br><span class="line">      return new Error(</span><br><span class="line">        &#39;Invalid prop &#96;&#39; + propName + &#39;&#96; supplied to&#39; +</span><br><span class="line">        &#39; &#96;&#39; + componentName + &#39;&#96;. Validation failed.&#39;</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line"></span><br><span class="line">  &#x2F;&#x2F; 你也可以提供一个自定义的 &#96;arrayOf&#96; 或 &#96;objectOf&#96; 验证器。</span><br><span class="line">  &#x2F;&#x2F; 它应该在验证失败时返回一个 Error 对象。</span><br><span class="line">  &#x2F;&#x2F; 验证器将验证数组或对象中的每个值。验证器的前两个参数</span><br><span class="line">  &#x2F;&#x2F; 第一个是数组或对象本身</span><br><span class="line">  &#x2F;&#x2F; 第二个是他们当前的键。</span><br><span class="line">  customArrayProp: PropTypes.arrayOf(function(propValue, key, componentName, location, propFullName) &#123;</span><br><span class="line">    if (!&#x2F;matchme&#x2F;.test(propValue[key])) &#123;</span><br><span class="line">      return new Error(</span><br><span class="line">        &#39;Invalid prop &#96;&#39; + propFullName + &#39;&#96; supplied to&#39; +</span><br><span class="line">        &#39; &#96;&#39; + componentName + &#39;&#96;. Validation failed.&#39;</span><br><span class="line">      );</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>限制单个元素</strong><br>你可以通过 PropTypes.element 来确保传递给组件的 children 中只包含一个元素。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; children必须只有一个元素，否则控制台会打印警告。</span><br><span class="line">MyComponent.propTypes &#x3D; &#123;</span><br><span class="line">  children: PropTypes.element.isRequired</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>默认Prop值</strong><br>您可以通过配置特定的 defaultProps 属性来定义 props 的默认值：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">class Greeting extends React.Component &#123;</span><br><span class="line">  render() &#123;</span><br><span class="line">    return (</span><br><span class="line">      &lt;h1&gt;Hello, &#123;this.props.name&#125;&lt;&#x2F;h1&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 指定 props 的默认值：</span><br><span class="line">Greeting.defaultProps &#x3D; &#123;</span><br><span class="line">  name: &#39;Stranger&#39;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; 不传递name将渲染出 &quot;Hello, Stranger&quot;：</span><br></pre></td></tr></table></figure>
+
+<h3 id="18-非受控组件"><a href="#18-非受控组件" class="headerlink" title="18.非受控组件"></a>18.非受控组件</h3><p>在大多数情况下，我们推荐使用 受控组件 来处理表单数据。在一个受控组件中，表单数据是由 React 组件来管理的。另一种替代方案是使用非受控组件，这时表单数据将交由 DOM 节点来处理。即使用类似ref等功能来从DOM节点获取表单数据。</p>
+<p><strong>默认值</strong><br>在 React 渲染生命周期时，表单元素上的 value 将会覆盖 DOM 节点中的值，在非受控组件中，你经常希望 React 能赋予组件一个初始值，但是不去控制后续的更新。 在这种情况下, 你可以指定一个 defaultValue 属性，而不是 value。</p>
+<p><strong>文件输入</strong></p>
+<figure class="highlight plain"><figcaption><span>type</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">使用 File API 与文件进行交互。</span><br></pre></td></tr></table></figure>
+<p>class FileInput extends React.Component {<br>  constructor(props) {<br>    super(props);<br>    this.handleSubmit = this.handleSubmit.bind(this);<br>    this.fileInput = React.createRef();<br>  }<br>  handleSubmit(event) {<br>    event.preventDefault();<br>    alert(<br>      <code>Selected file - ${this.fileInput.current.files[0].name}</code><br>    );<br>  }</p>
+<p>  render() {<br>    return (<br>      <form onSubmit={this.handleSubmit}><br>        <label><br>          Upload file:<br>          <input type="file" ref={this.fileInput} /><br>        </label><br>        <br /><br>        <button type="submit">Submit</button><br>      </form><br>    );<br>  }<br>}</p>
+<p>ReactDOM.render(<br>  <FileInput />,<br>  document.getElementById(‘root’)<br>);</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">### 19. Web Components</span><br><span class="line">React 和 Web Components 为了解决不同的问题而生。Web Components 为可复用组件提供了强大的封装，而 React 则提供了声明式的解决方案，使 DOM 与数据保持同步。两者旨在互补。作为开发人员，可以自由选择在 Web Components 中使用 React，或者在 React 中使用 Web Components，或者两者共存。</span><br><span class="line"></span><br><span class="line">大多数开发者在使用 React 时，不使用 Web Components，但可能你会需要使用，尤其是在使用 Web Components 编写的第三方 UI 组件时。</span><br></pre></td></tr></table></figure>
+<p>class HelloMessage extends React.Component {<br>  render() {<br>    return <div>Hello <x-search>{this.props.name}</x-search>!</div>;<br>  }<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Web Components 通常暴露的是命令式 API。例如，Web Components 的组件 video 可能会公开 play() 和 pause() 方法。要访问 Web Components 的命令式 API，你需要使用 ref 直接与 DOM 节点进行交互。如果你使用的是第三方 Web Components，那么最好的解决方案是编写 React 组件包装该 Web Components。</span><br><span class="line"></span><br><span class="line">Web Components 触发的事件可能无法通过 React 渲染树正确的传递。 你需要在 React 组件中手动添加事件处理器来处理这些事件。</span><br><span class="line"></span><br><span class="line">常见的误区是要注意在 Web Components 中应该使用 class 而非 className。</span><br><span class="line"></span><br><span class="line">**在 Web Components 中使用 React**</span><br></pre></td></tr></table></figure>
+<p>class XSearch extends HTMLElement {<br>  connectedCallback() {<br>    const mountPoint = document.createElement(‘span’);<br>    this.attachShadow({ mode: ‘open’ }).appendChild(mountPoint);</p>
+<pre><code>const name = this.getAttribute(&apos;name&apos;);
+const url = &apos;https://www.google.com/search?q=&apos; + encodeURIComponent(name);
+ReactDOM.render(&lt;a href={url}&gt;{name}&lt;/a&gt;, mountPoint);</code></pre><p>  }<br>}<br>customElements.define(‘x-search’, XSearch);</p>
+<p>```<br>注意：<br>如果使用 Babel 来转换 class，此代码将不会起作用。请查阅该 <a href="https://github.com/w3c/webcomponents/issues/587" target="_blank" rel="noopener">issue</a> 了解相关讨论。 在加载 Web Components 前请引入 <a href="https://github.com/webcomponents/polyfills/tree/master/packages/webcomponentsjs#custom-elements-es5-adapterjs" target="_blank" rel="noopener">custom-elements-es5-adapter</a> 来解决该 issue。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/React/" rel="tag"># React</a>
+              <a href="/tags/%E5%9F%BA%E7%A1%80/" rel="tag"># 基础</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-%E5%9F%BA%E6%9C%AC/" rel="prev" title="React官方文档知识点-基本">
+      <i class="fa fa-chevron-left"></i> React官方文档知识点-基本
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/28/React%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E7%9F%A5%E8%AF%86%E7%82%B9-Context%E5%92%8CHook/" rel="next" title="React官方文档知识点-Context和Hook">
+      React官方文档知识点-Context和Hook <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#正文"><span class="nav-number">1.</span> <span class="nav-text">正文</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-无障碍辅助功能"><span class="nav-number">1.0.1.</span> <span class="nav-text">1.无障碍辅助功能</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-代码分割"><span class="nav-number">1.0.2.</span> <span class="nav-text">2.代码分割</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-Context"><span class="nav-number">1.0.3.</span> <span class="nav-text">3.Context</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-错误边界"><span class="nav-number">1.0.4.</span> <span class="nav-text">4.错误边界</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-Refs-和-DOM"><span class="nav-number">1.0.5.</span> <span class="nav-text">5.Refs 和 DOM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-Fragments"><span class="nav-number">1.0.6.</span> <span class="nav-text">6.Fragments</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-高阶组件"><span class="nav-number">1.0.7.</span> <span class="nav-text">7.高阶组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-与其它视图库集成"><span class="nav-number">1.0.8.</span> <span class="nav-text">8.与其它视图库集成</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#9-深入JSX"><span class="nav-number">1.0.9.</span> <span class="nav-text">9.深入JSX</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#10-性能优化"><span class="nav-number">1.0.10.</span> <span class="nav-text">10.性能优化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#11-Portals"><span class="nav-number">1.0.11.</span> <span class="nav-text">11.Portals</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#12-Profiler-API"><span class="nav-number">1.0.12.</span> <span class="nav-text">12.Profiler API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#13-React-Diffing的原理-协调算法"><span class="nav-number">1.0.13.</span> <span class="nav-text">13.React Diffing的原理 协调算法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#14-render-props"><span class="nav-number">1.0.14.</span> <span class="nav-text">14.render props</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#15-静态类型检查"><span class="nav-number">1.0.15.</span> <span class="nav-text">15.静态类型检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#16-严格模式"><span class="nav-number">1.0.16.</span> <span class="nav-text">16.严格模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#17-PropTypes-类型检查"><span class="nav-number">1.0.17.</span> <span class="nav-text">17.PropTypes 类型检查</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#18-非受控组件"><span class="nav-number">1.0.18.</span> <span class="nav-text">18.非受控组件</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Toulon Du</p>
+  <div class="site-description" itemprop="description">Sharing Knowledge And Learn More</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">12</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">分类</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">标签</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Toulon Du</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
