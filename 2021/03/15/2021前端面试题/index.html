@@ -304,7 +304,7 @@ path.replaceWith(t.FunctionDeclaration(id.params,body))
 <li><p>使用cloneNode和replaceChild，引发一次reflow和repaint。</p>
 </li>
 </ul>
-<h3 id="9-设计和实现一个-LRU-最近最少使用-缓存机制。它应该支持以下操作：-获取数据-get-和-写入数据-put-。"><a href="#9-设计和实现一个-LRU-最近最少使用-缓存机制。它应该支持以下操作：-获取数据-get-和-写入数据-put-。" class="headerlink" title="9. 设计和实现一个 LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。"></a>9. 设计和实现一个 LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。</h3><p>这个题主要利用js的Map对象在迭代时会根据对象中元素的插入顺序来进行的特点。因此不需要我们自己记录每个key插入和被使用的时间。</p>
+<h3 id="9-设计和实现一个-LRU-最近最少使用-缓存机制。它应该支持以下操作：-获取数据-get-和-写入数据-put-。"><a href="#9-设计和实现一个-LRU-最近最少使用-缓存机制。它应该支持以下操作：-获取数据-get-和-写入数据-put-。" class="headerlink" title="9.设计和实现一个 LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。"></a>9.设计和实现一个 LRU (最近最少使用) 缓存机制。它应该支持以下操作： 获取数据 get 和 写入数据 put 。</h3><p>这个题主要利用js的Map对象在迭代时会根据对象中元素的插入顺序来进行的特点。因此不需要我们自己记录每个key插入和被使用的时间。</p>
 <pre><code class="hljs plain">&#x2F;&#x2F; 新添加的元素会被插入到map的末尾，整个栈倒序查看
 class LRUCache &#123;
   constructor(capacity) &#123;
@@ -365,7 +365,7 @@ function bottoleFunc(func, interval) &#123;
   &#125;;
 &#125;</code></pre>
 
-<h3 id="11-grpc的优缺点"><a href="#11-grpc的优缺点" class="headerlink" title="11. grpc的优缺点"></a>11. grpc的优缺点</h3><p>RPC(remote procedure call 远程过程调用)框架实际是提供了一套机制，使得应用程序之间可以进行通信，而且也遵从server/client模型。使用的时候客户端调用server端提供的接口就像是调用本地的函数一样。如下图所示就是一个典型的RPC结构图。</p>
+<h3 id="11-grpc的优缺点"><a href="#11-grpc的优缺点" class="headerlink" title="11.grpc的优缺点"></a>11.grpc的优缺点</h3><p>RPC(remote procedure call 远程过程调用)框架实际是提供了一套机制，使得应用程序之间可以进行通信，而且也遵从server/client模型。使用的时候客户端调用server端提供的接口就像是调用本地的函数一样。如下图所示就是一个典型的RPC结构图。</p>
 <p><strong>gRPC vs. Restful API</strong><br>gRPC和restful API都提供了一套通信机制，用于server/client模型通信，而且它们都使用http作为底层的传输协议(严格地说, gRPC使用的http2.0，而restful api则不一定)。不过gRPC还是有些特有的优势，如下：</p>
 <ul>
 <li>gRPC可以通过protobuf来定义接口，从而可以有更加严格的接口约束条件。</li>
@@ -378,7 +378,7 @@ function bottoleFunc(func, interval) &#123;
 <li>对于性能有更高的要求时。</li>
 </ul>
 <p>但是，通常我们不会去单独使用gRPC，而是将gRPC作为一个部件进行使用，这是因为在生产环境，我们面对大并发的情况下，需要使用分布式系统来去处理，而gRPC并没有提供分布式系统相关的一些必要组件。而且，真正的线上服务还需要提供包括负载均衡，限流熔断，监控报警，服务注册和发现等等必要的组件。</p>
-<h3 id="12-http2-0的相关特性"><a href="#12-http2-0的相关特性" class="headerlink" title="12. http2.0的相关特性"></a>12. http2.0的相关特性</h3><p>HTTP/2 的首要目标是通过完全的请求,响应多路复用,头部的压缩头部域来减小头部的体积,添加了请求优先级,服务端推送.<br>为了支持这些特性,他需要大量的协议增加头部字段来支持,例如新的流量控制,差错处理,升级机制.而这些是每个web开发者都应该在他们的应用中用到的.</p>
+<h3 id="12-http2-0的相关特性"><a href="#12-http2-0的相关特性" class="headerlink" title="12.http2.0的相关特性"></a>12.http2.0的相关特性</h3><p>HTTP/2 的首要目标是通过完全的请求,响应多路复用,头部的压缩头部域来减小头部的体积,添加了请求优先级,服务端推送.<br>为了支持这些特性,他需要大量的协议增加头部字段来支持,例如新的流量控制,差错处理,升级机制.而这些是每个web开发者都应该在他们的应用中用到的.</p>
 <p><a href="https://www.cnblogs.com/yixiaogo/p/11932966.html" target="_blank" rel="noopener">https://www.cnblogs.com/yixiaogo/p/11932966.html</a></p>
 <ul>
 <li><p>二进制帧层：它指HTTP消息在客户端和服务端如何封装和传输.</p>
@@ -398,8 +398,8 @@ function bottoleFunc(func, interval) &#123;
 <li><p>头部压缩</p>
 </li>
 </ul>
-<h1 id="13-viewport-和移动端布局方案"><a href="#13-viewport-和移动端布局方案" class="headerlink" title="13.viewport 和移动端布局方案"></a>13.viewport 和移动端布局方案</h1><p>TODO</p>
-<h1 id="14-vue的依赖收集原理"><a href="#14-vue的依赖收集原理" class="headerlink" title="14.vue的依赖收集原理"></a>14.vue的依赖收集原理</h1><p>早期使用Object.defineProperty实现，后改造成Proxy，但原理相同。<br>主要基于Dep.target，Dep和dep.addSub<br>首先会遍历整个state数据结构，给每个数据都加上一个get监控和set监控，在某个数据被get的时候就会进行依赖收集。</p>
+<h3 id="13-viewport-和移动端布局方案"><a href="#13-viewport-和移动端布局方案" class="headerlink" title="13.viewport 和移动端布局方案"></a>13.viewport 和移动端布局方案</h3><p>TODO</p>
+<h3 id="14-vue的依赖收集原理"><a href="#14-vue的依赖收集原理" class="headerlink" title="14.vue的依赖收集原理"></a>14.vue的依赖收集原理</h3><p>早期使用Object.defineProperty实现，后改造成Proxy，但原理相同。<br>主要基于Dep.target，Dep和dep.addSub<br>首先会遍历整个state数据结构，给每个数据都加上一个get监控和set监控，在某个数据被get的时候就会进行依赖收集。</p>
 <pre><code class="hljs plain">function defineReactive(obj, key) &#123;    
     var dep &#x3D; new Dep();    
     var val  &#x3D; obj[key]    
@@ -418,7 +418,8 @@ function bottoleFunc(func, interval) &#123;
 <p>Dep 是一个构造函数，用于创建实例，并带有很多方法</p>
 <p>于是，收集流程大概是这样<br>1、页面的渲染函数执行， name 被读取<br>2、触发 name的 Object.defineProperty.get 方法<br>3、于是，页面的 watcher 就会被收集到 name 专属的闭包dep 的 subs 中</p>
 <p>PS:<br>基础数据类型，只使用 【闭包dep】 来存储依赖<br>引用数据类型，使用 【闭包dep】 和 【 <strong>ob</strong>.dep】 两种来存储依赖</p>
-<h1 id="15-怎么给一个购物车做架构设计"><a href="#15-怎么给一个购物车做架构设计" class="headerlink" title="15. 怎么给一个购物车做架构设计"></a>15. 怎么给一个购物车做架构设计</h1><p><a href="https://www.v2ex.com/t/669861" target="_blank" rel="noopener">https://www.v2ex.com/t/669861</a></p>
+<h3 id="15-怎么给一个购物车做架构设计"><a href="#15-怎么给一个购物车做架构设计" class="headerlink" title="15.怎么给一个购物车做架构设计"></a>15.怎么给一个购物车做架构设计</h3><p><a href="https://www.v2ex.com/t/669861" target="_blank" rel="noopener">https://www.v2ex.com/t/669861</a></p>
+<h3 id="16-手写一个Promise"><a href="#16-手写一个Promise" class="headerlink" title="16.手写一个Promise"></a>16.手写一个Promise</h3><p>TODO</p>
 <p>未完待续…</p>
 
             </article>
