@@ -143,7 +143,7 @@
                   
                   <span class="post-meta mr-2">
                     <i class="iconfont icon-chart"></i>
-                    4.2k 字
+                    5.8k 字
                   </span>
                 
 
@@ -153,7 +153,7 @@
                       <i class="iconfont icon-clock-fill"></i>
                     
                     
-                    49
+                    72
                      分钟
                   </span>
                 
@@ -419,7 +419,192 @@ function bottoleFunc(func, interval) &#123;
 <p>于是，收集流程大概是这样<br>1、页面的渲染函数执行， name 被读取<br>2、触发 name的 Object.defineProperty.get 方法<br>3、于是，页面的 watcher 就会被收集到 name 专属的闭包dep 的 subs 中</p>
 <p>PS:<br>基础数据类型，只使用 【闭包dep】 来存储依赖<br>引用数据类型，使用 【闭包dep】 和 【 <strong>ob</strong>.dep】 两种来存储依赖</p>
 <h3 id="15-怎么给一个购物车做架构设计"><a href="#15-怎么给一个购物车做架构设计" class="headerlink" title="15.怎么给一个购物车做架构设计"></a>15.怎么给一个购物车做架构设计</h3><p><a href="https://www.v2ex.com/t/669861" target="_blank" rel="noopener">https://www.v2ex.com/t/669861</a></p>
-<h3 id="16-手写一个Promise"><a href="#16-手写一个Promise" class="headerlink" title="16.手写一个Promise"></a>16.手写一个Promise</h3><p>TODO</p>
+<h3 id="16-手写一个Promise"><a href="#16-手写一个Promise" class="headerlink" title="16.手写一个Promise"></a>16.手写一个Promise</h3><p>两个版本</p>
+<p>简单版：</p>
+<pre><code class="hljs plain">function myPromise(constructor)&#123;
+    let self&#x3D;this;
+    self.status&#x3D;&quot;pending&quot; &#x2F;&#x2F;定义状态改变前的初始状态
+    self.value&#x3D;undefined;&#x2F;&#x2F;定义状态为resolved的时候的状态
+    self.reason&#x3D;undefined;&#x2F;&#x2F;定义状态为rejected的时候的状态
+    function resolve(value)&#123;
+        &#x2F;&#x2F;两个&#x3D;&#x3D;&#x3D;&quot;pending&quot;，保证了状态的改变是不可逆的
+       if(self.status&#x3D;&#x3D;&#x3D;&quot;pending&quot;)&#123;
+          self.value&#x3D;value;
+          self.status&#x3D;&quot;resolved&quot;;
+       &#125;
+    &#125;
+    function reject(reason)&#123;
+        &#x2F;&#x2F;两个&#x3D;&#x3D;&#x3D;&quot;pending&quot;，保证了状态的改变是不可逆的
+       if(self.status&#x3D;&#x3D;&#x3D;&quot;pending&quot;)&#123;
+          self.reason&#x3D;reason;
+          self.status&#x3D;&quot;rejected&quot;;
+       &#125;
+    &#125;
+    &#x2F;&#x2F;捕获构造异常
+    try&#123;
+       constructor(resolve,reject);
+    &#125;catch(e)&#123;
+       reject(e);
+    &#125;
+&#125;
+
+myPromise.prototype.then&#x3D;function(onFullfilled,onRejected)&#123;
+   let self&#x3D;this;
+   switch(self.status)&#123;
+      case &quot;resolved&quot;:
+        onFullfilled(self.value);
+        break;
+      case &quot;rejected&quot;:
+        onRejected(self.reason);
+        break;
+      default:       
+   &#125;
+&#125;</code></pre>
+
+
+<p>进阶版：</p>
+<pre><code class="hljs plain">const PENDING &#x3D; &quot;pending&quot;;
+const FULFILLED &#x3D; &quot;fulfilled&quot;;
+const REJECTED &#x3D; &quot;rejected&quot;;
+ 
+function Promise(excutor) &#123;
+    let that &#x3D; this; &#x2F;&#x2F; 缓存当前promise实例对象
+    that.status &#x3D; PENDING; &#x2F;&#x2F; 初始状态
+    that.value &#x3D; undefined; &#x2F;&#x2F; fulfilled状态时 返回的信息
+    that.reason &#x3D; undefined; &#x2F;&#x2F; rejected状态时 拒绝的原因
+    that.onFulfilledCallbacks &#x3D; []; &#x2F;&#x2F; 存储fulfilled状态对应的onFulfilled函数
+    that.onRejectedCallbacks &#x3D; []; &#x2F;&#x2F; 存储rejected状态对应的onRejected函数
+ 
+    function resolve(value) &#123; &#x2F;&#x2F; value成功态时接收的终值
+        if(value instanceof Promise) &#123;
+            return value.then(resolve, reject);
+        &#125;
+        &#x2F;&#x2F; 实践中要确保 onFulfilled 和 onRejected 方法异步执行，且应该在 then 方法被调用的那一轮事件循环之后的新执行栈中执行。
+        setTimeout(() &#x3D;&gt; &#123;
+            &#x2F;&#x2F; 调用resolve 回调对应onFulfilled函数
+            if (that.status &#x3D;&#x3D;&#x3D; PENDING) &#123;
+                &#x2F;&#x2F; 只能由pending状态 &#x3D;&gt; fulfilled状态 (避免调用多次resolve reject)
+                that.status &#x3D; FULFILLED;
+                that.value &#x3D; value;
+                that.onFulfilledCallbacks.forEach(cb &#x3D;&gt; cb(that.value));
+            &#125;
+        &#125;);
+    &#125;
+    function reject(reason) &#123; &#x2F;&#x2F; reason失败态时接收的拒因
+        setTimeout(() &#x3D;&gt; &#123;
+            &#x2F;&#x2F; 调用reject 回调对应onRejected函数
+            if (that.status &#x3D;&#x3D;&#x3D; PENDING) &#123;
+                &#x2F;&#x2F; 只能由pending状态 &#x3D;&gt; rejected状态 (避免调用多次resolve reject)
+                that.status &#x3D; REJECTED;
+                that.reason &#x3D; reason;
+                that.onRejectedCallbacks.forEach(cb &#x3D;&gt; cb(that.reason));
+            &#125;
+        &#125;);
+    &#125;
+ 
+    &#x2F;&#x2F; 捕获在excutor执行器中抛出的异常
+    &#x2F;&#x2F; new Promise((resolve, reject) &#x3D;&gt; &#123;
+    &#x2F;&#x2F;     throw new Error(&#39;error in excutor&#39;)
+    &#x2F;&#x2F; &#125;)
+    try &#123;
+        excutor(resolve, reject);
+    &#125; catch (e) &#123;
+        reject(e);
+    &#125;
+&#125;
+ 
+Promise.prototype.then &#x3D; function(onFulfilled, onRejected) &#123;
+    const that &#x3D; this;
+    let newPromise;
+    &#x2F;&#x2F; 处理参数默认值 保证参数后续能够继续执行
+    onFulfilled &#x3D;
+        typeof onFulfilled &#x3D;&#x3D;&#x3D; &quot;function&quot; ? onFulfilled : value &#x3D;&gt; value;
+    onRejected &#x3D;
+        typeof onRejected &#x3D;&#x3D;&#x3D; &quot;function&quot; ? onRejected : reason &#x3D;&gt; &#123;
+            throw reason;
+        &#125;;
+    if (that.status &#x3D;&#x3D;&#x3D; FULFILLED) &#123; &#x2F;&#x2F; 成功态
+        return newPromise &#x3D; new Promise((resolve, reject) &#x3D;&gt; &#123;
+            setTimeout(() &#x3D;&gt; &#123;
+                try&#123;
+                    let x &#x3D; onFulfilled(that.value);
+                    resolvePromise(newPromise, x, resolve, reject); &#x2F;&#x2F; 新的promise resolve 上一个onFulfilled的返回值
+                &#125; catch(e) &#123;
+                    reject(e); &#x2F;&#x2F; 捕获前面onFulfilled中抛出的异常 then(onFulfilled, onRejected);
+                &#125;
+            &#125;);
+        &#125;)
+    &#125;
+ 
+    if (that.status &#x3D;&#x3D;&#x3D; REJECTED) &#123; &#x2F;&#x2F; 失败态
+        return newPromise &#x3D; new Promise((resolve, reject) &#x3D;&gt; &#123;
+            setTimeout(() &#x3D;&gt; &#123;
+                try &#123;
+                    let x &#x3D; onRejected(that.reason);
+                    resolvePromise(newPromise, x, resolve, reject);
+                &#125; catch(e) &#123;
+                    reject(e);
+                &#125;
+            &#125;);
+        &#125;);
+    &#125;
+ 
+    if (that.status &#x3D;&#x3D;&#x3D; PENDING) &#123; &#x2F;&#x2F; 等待态
+        &#x2F;&#x2F; 当异步调用resolve&#x2F;rejected时 将onFulfilled&#x2F;onRejected收集暂存到集合中
+        return newPromise &#x3D; new Promise((resolve, reject) &#x3D;&gt; &#123;
+            that.onFulfilledCallbacks.push((value) &#x3D;&gt; &#123;
+                try &#123;
+                    let x &#x3D; onFulfilled(value);
+                    resolvePromise(newPromise, x, resolve, reject);
+                &#125; catch(e) &#123;
+                    reject(e);
+                &#125;
+            &#125;);
+            that.onRejectedCallbacks.push((reason) &#x3D;&gt; &#123;
+                try &#123;
+                    let x &#x3D; onRejected(reason);
+                    resolvePromise(newPromise, x, resolve, reject);
+                &#125; catch(e) &#123;
+                    reject(e);
+                &#125;
+            &#125;);
+        &#125;);
+    &#125;
+&#125;;</code></pre>
+
+<h3 id="JavaScript的new-做了什么"><a href="#JavaScript的new-做了什么" class="headerlink" title="JavaScript的new 做了什么"></a>JavaScript的new 做了什么</h3><p>比如 <code>const p = new Persion(&#39;xxx&#39;)</code><br>1.添加一个{}对象，将函数的this指向这个对象。然后将对象返回。<br>2.将Person函数prototype原型也指向这个对象的<strong>proto</strong>。 即 <code>p.__proto = Person.prototype</code>。</p>
+<h3 id="react-内部如何识别-class-组件和-function-组件"><a href="#react-内部如何识别-class-组件和-function-组件" class="headerlink" title="react 内部如何识别 class 组件和 function 组件"></a>react 内部如何识别 class 组件和 function 组件</h3><p>直接区分是不是class是不行的，因为在被babel等工具转译之后二者都是function。</p>
+<p>好像可以使用原型机制。 如果所有的class都继承自React.Component，通过 <code>XXX.prototype instanceof React.Component</code>可以达到效果。</p>
+<p>但有时候我们检查的组件可能是继承至别的React组件的React.Component副本。这个时候instanceof就抓瞎了。</p>
+<p>所以，react在React.Component的prototype上加了一个属性：<code>isReactComponent</code>:  </p>
+<pre><code class="hljs plain">class Component &#123;&#125;
+Component.prototype.isReactComponent &#x3D; &#123;&#125;;
+
+&#x2F;&#x2F; We can check it like this
+class Greeting extends Component &#123;&#125;
+console.log(Greeting.prototype.isReactComponent); &#x2F;&#x2F; ✅ Yes</code></pre>
+
+<h3 id="React-事件机制"><a href="#React-事件机制" class="headerlink" title="React 事件机制"></a>React 事件机制</h3><ol>
+<li>当我们在组件上设置事件处理器时，React并不会在改DOM元素上直接绑定事件处理器，而是在react内部自定义一套事件系统，在这个系统上进行统一的事件订阅和分发</li>
+<li>react利用事件委托机制在Document上统一监听DOM事件，在根据触发的target将事件分发到具体的组件实例，实际我们在事件里面拿到的event其实并不是原始的DOM事件对象，而是一个合成事件对象</li>
+</ol>
+<p><strong>为什么需要</strong><br>1 .抹平浏览器之间的兼容性差异，react还会通过其他事件来模拟一些低版本不兼容的事件<br>2 .事件合成，自定义高级事件，比如onChange事件，为表单元素定义了统一的值来变动事件<br>3 .React打算更多优化。比如利用事件委托，大部分事件最总绑定了Document，而不是dom节点本身，这样简化了dom事件处理逻辑，减少了内存的开销。react自己实现了一套模拟事件冒泡的机制<br>4 .react干预了事件的分发。Fiber架构，优化了用户的交互体验，干预事件的分发，不同的事件有不同的优先级。高的优先级事件可以中断渲染，让用户代码即使响应用户交互</p>
+<p><a href="https://www.jianshu.com/p/440f0fd43c8f" target="_blank" rel="noopener">https://www.jianshu.com/p/440f0fd43c8f</a></p>
+<h3 id="css扇形-一个元素"><a href="#css扇形-一个元素" class="headerlink" title="css扇形(一个元素)"></a>css扇形(一个元素)</h3><pre><code class="hljs plain">.fan&#123;
+  border-radius:50%;
+  border:100px solid transparent;
+  width:0;
+  border-top-color: red;
+&#125;</code></pre>
+<h3 id="Sleep-函数-手写"><a href="#Sleep-函数-手写" class="headerlink" title="Sleep 函数(手写)"></a>Sleep 函数(手写)</h3><ol>
+<li>用while循环，强阻断</li>
+<li>setTimeout 回调</li>
+<li>Promise + setTimeout + async/await</li>
+</ol>
+<h3 id="es5-实现-es6-extend"><a href="#es5-实现-es6-extend" class="headerlink" title="es5 实现 es6 extend"></a>es5 实现 es6 extend</h3><p>TODO</p>
+<h3 id="二叉树所有根到叶子路径组成的数字之和"><a href="#二叉树所有根到叶子路径组成的数字之和" class="headerlink" title="二叉树所有根到叶子路径组成的数字之和"></a>二叉树所有根到叶子路径组成的数字之和</h3><p>略。</p>
+<h3 id="Form-JSON-schema"><a href="#Form-JSON-schema" class="headerlink" title="Form JSON schema"></a>Form JSON schema</h3><p>TODO</p>
+<h3 id="怎么实现动画，js动画的缺陷"><a href="#怎么实现动画，js动画的缺陷" class="headerlink" title="怎么实现动画，js动画的缺陷"></a>怎么实现动画，js动画的缺陷</h3><p>TODO</p>
 <p>未完待续…</p>
 
             </article>
@@ -445,6 +630,12 @@ function bottoleFunc(func, interval) &#123;
                 <div class="post-prevnext row">
                   <div class="post-prev col-6">
                     
+                    
+                      <a href="/2021/05/24/%E8%A2%81%E8%80%81%E7%9A%84%E5%AE%BF%E8%88%8D/">
+                        <i class="iconfont icon-arrowleft"></i>
+                        <span class="hidden-mobile">袁老的宿舍</span>
+                        <span class="visible-mobile">上一篇</span>
+                      </a>
                     
                   </div>
                   <div class="post-next col-6">
